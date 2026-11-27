@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { Download, Printer, QrCode, Save } from "lucide-react";
 
 interface SettingsState {
@@ -462,6 +463,12 @@ export default function AdminSettingsPage() {
               Print Poster
             </button>
           </div>
+          <Link
+            href="/admin/posters"
+            className="block w-full py-2.5 rounded-lg bg-[#5B1717] text-[#F8F3E9] text-xs font-semibold hover:bg-[#3E0F0F]"
+          >
+            Open Full A4 Temple Posters & Swami Guide →
+          </Link>
         </div>
       </div>
 

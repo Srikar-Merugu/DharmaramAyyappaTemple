@@ -10,6 +10,7 @@ import {
   ExternalLink,
   LayoutDashboard,
   LogOut,
+  Printer,
   Settings,
   Users,
 } from "lucide-react";
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { href: "/admin/attendance", label: "Attendance", icon: CheckSquare },
   { href: "/admin/profiles", label: "Swami Profiles", icon: Users },
   { href: "/admin/reports", label: "Reports", icon: BarChart3 },
+  { href: "/admin/posters", label: "Print Posters", icon: Printer },
   { href: "/admin/settings", label: "Settings & QR", icon: Settings },
 ];
 
