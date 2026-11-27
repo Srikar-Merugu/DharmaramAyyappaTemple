@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { useAdminLang } from "@/components/AdminLangContext";
 import { Calendar, Search, User } from "lucide-react";
 
 interface ProfileItem {
@@ -34,6 +35,7 @@ interface ProfileDetail {
 }
 
 export default function AdminProfilesPage() {
+  const { at } = useAdminLang();
   const [q, setQ] = useState("");
   const [profiles, setProfiles] = useState<ProfileItem[]>([]);
   const [selected, setSelected] = useState<ProfileDetail | null>(null);
@@ -70,10 +72,10 @@ export default function AdminProfilesPage() {
     <div className="space-y-5">
       <div>
         <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
-          Swami Profiles & Visit History
+          {at.profiles.title}
         </h1>
         <p className="text-sm text-[#29231F]/70">
-          Search returning devotees by name, phone, village, or profile code. Profiles are never auto-merged by name alone.
+          {at.profiles.subtitle}
         </p>
       </div>
 

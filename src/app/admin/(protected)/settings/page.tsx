@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useAdminLang } from "@/components/AdminLangContext";
 import { Download, Printer, QrCode, Save } from "lucide-react";
 
 interface SettingsState {
@@ -41,6 +42,7 @@ interface AuditItem {
 }
 
 export default function AdminSettingsPage() {
+  const { at } = useAdminLang();
   const [settings, setSettings] = useState<SettingsState | null>(null);
   const [batches, setBatches] = useState<BatchState[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditItem[]>([]);
@@ -115,7 +117,7 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-6">
       <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
-        Season Settings & Permanent QR Code
+        {at.settings.title}
       </h1>
 
       {msg && (

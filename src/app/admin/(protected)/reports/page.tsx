@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { useAdminLang } from "@/components/AdminLangContext";
 import { Download, Printer } from "lucide-react";
 
 interface ReportData {
@@ -52,6 +53,7 @@ interface ReportData {
 }
 
 export default function AdminReportsPage() {
+  const { at } = useAdminLang();
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,10 +82,10 @@ export default function AdminReportsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
         <div>
           <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
-            Reports & Food Planning
+            {at.reports.title}
           </h1>
           <p className="text-sm text-[#29231F]/70">
-            Daily batch reconciliation, seasonal utilization, and CSV exports
+            {at.reports.subtitle}
           </p>
         </div>
 

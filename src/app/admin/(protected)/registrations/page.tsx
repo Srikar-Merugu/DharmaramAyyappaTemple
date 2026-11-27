@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { useAdminLang } from "@/components/AdminLangContext";
 import {
   ChevronDown,
   ChevronUp,
@@ -39,6 +40,7 @@ interface RegItem {
 }
 
 export default function AdminRegistrationsPage() {
+  const { at } = useAdminLang();
   const [regs, setRegs] = useState<RegItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState("");
@@ -200,10 +202,10 @@ export default function AdminRegistrationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
-            Registrations
+            {at.registrations.title}
           </h1>
           <p className="text-sm text-[#29231F]/70">
-            Search, view, edit, cancel, or add manual registrations
+            {at.registrations.subtitle}
           </p>
         </div>
         <button
@@ -212,7 +214,7 @@ export default function AdminRegistrationsPage() {
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#5B1717] hover:bg-[#3E0F0F] text-[#F8F3E9] text-sm font-semibold"
         >
           <Plus className="w-4 h-4" />
-          Manual Registration
+          {at.registrations.manualBtn.replace(/^\+\s*/, "")}
         </button>
       </div>
 

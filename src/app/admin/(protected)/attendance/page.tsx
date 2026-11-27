@@ -2,6 +2,7 @@
 
 import React, { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useAdminLang } from "@/components/AdminLangContext";
 import { Check, Clock, UserPlus, X } from "lucide-react";
 
 interface AttMember {
@@ -33,6 +34,7 @@ interface WalkInItem {
 }
 
 function AttendanceContent() {
+  const { at } = useAdminLang();
   const sp = useSearchParams();
   const [date, setDate] = useState(
     () => sp.get("date") || new Date().toISOString().slice(0, 10)
@@ -140,10 +142,10 @@ function AttendanceContent() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
-            Batch Attendance & Walk-ins
+            {at.attendance.title}
           </h1>
           <p className="text-sm text-[#29231F]/70">
-            Mark individual or group attendance and record walk-in devotees
+            {at.attendance.subtitle}
           </p>
         </div>
 

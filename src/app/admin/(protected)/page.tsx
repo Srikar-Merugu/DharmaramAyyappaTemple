@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useAdminLang } from "@/components/AdminLangContext";
 import {
   Calendar,
   CheckCircle2,
@@ -57,6 +58,7 @@ interface OverviewData {
 }
 
 export default function AdminOverviewPage() {
+  const { lang, at } = useAdminLang();
   const [date, setDate] = useState<string>("");
   const [data, setData] = useState<OverviewData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,10 +92,10 @@ export default function AdminOverviewPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
-            Daily Annadanam Overview
+            {at.overview.title}
           </h1>
           <p className="text-sm text-[#29231F]/70">
-            {data?.settings.name || "Ayyappa Season"} • Cutoff{" "}
+            {data?.settings.name || "Ayyappa Season"} • {at.overview.cutoff}{" "}
             {data?.settings.cutoffTime || "09:00"} IST
           </p>
         </div>
@@ -123,8 +125,14 @@ export default function AdminOverviewPage() {
         <>
           {data.upcomingCounts && (
             <div className="flex flex-wrap items-center gap-2">
-              {data.upcomingCounts.map((u) => {
+              {data.upcomingCounts.map((u, idx) => {
                 const active = u.date === date;
+                const dayLabel =
+                  idx === 0
+                    ? at.overview.today
+                    : idx === 1
+                    ? at.overview.tomorrow
+                    : at.overview.dayAfter;
                 return (
                   <button
                     key={u.date}
@@ -137,7 +145,7 @@ export default function AdminOverviewPage() {
                     }`}
                   >
                     <span>
-                      {u.label} ({u.date.slice(5)})
+                      {dayLabel} ({u.date.slice(5)})
                     </span>
                     <span
                       className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold ${
@@ -159,7 +167,7 @@ export default function AdminOverviewPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white rounded-xl p-4 border border-[#E9DDC9]">
               <div className="flex items-center justify-between text-xs font-semibold text-[#29231F]/65 uppercase tracking-wider">
-                Expected Registered
+                {at.overview.expectedRegistered}
                 <Users className="w-4 h-4 text-[#5B1717]" />
               </div>
               <div className="text-3xl font-bold text-[#29231F] mt-2">
@@ -170,41 +178,41 @@ export default function AdminOverviewPage() {
                 </span>
               </div>
               <div className="text-xs text-[#29231F]/70 mt-1">
-                {data.summary.individualRegs} individual •{" "}
-                {data.summary.groupRegs} group
+                {data.summary.individualRegs} {at.overview.individual} •{" "}
+                {data.summary.groupRegs} {at.overview.group}
               </div>
             </div>
 
             <div className="bg-white rounded-xl p-4 border border-[#E9DDC9]">
               <div className="flex items-center justify-between text-xs font-semibold text-[#29231F]/65 uppercase tracking-wider">
-                Actual Attendance
+                {at.overview.actualAttendance}
                 <UserCheck className="w-4 h-4 text-[#52664B]" />
               </div>
               <div className="text-3xl font-bold text-[#52664B] mt-2">
                 {data.summary.actualAttendance}
               </div>
               <div className="text-xs text-[#29231F]/70 mt-1">
-                {data.summary.attendedRegistered} registered +{" "}
-                {data.summary.walkInCount} walk-ins
+                {data.summary.attendedRegistered} {at.overview.registeredLabel} +{" "}
+                {data.summary.walkInCount} {at.overview.walkIns}
               </div>
             </div>
 
             <div className="bg-white rounded-xl p-4 border border-[#E9DDC9]">
               <div className="flex items-center justify-between text-xs font-semibold text-[#29231F]/65 uppercase tracking-wider">
-                Walk-ins
+                {at.overview.walkIns}
                 <UserPlus className="w-4 h-4 text-[#B58A45]" />
               </div>
               <div className="text-3xl font-bold text-[#29231F] mt-2">
                 {data.summary.walkInCount}
               </div>
               <div className="text-xs text-[#29231F]/70 mt-1">
-                Recorded directly at service
+                {at.overview.walkInSub}
               </div>
             </div>
 
             <div className="bg-white rounded-xl p-4 border border-[#E9DDC9]">
               <div className="flex items-center justify-between text-xs font-semibold text-[#29231F]/65 uppercase tracking-wider">
-                No-shows / Cancelled
+                {at.overview.noShowsCancelled}
                 <XCircle className="w-4 h-4 text-[#A83224]" />
               </div>
               <div className="text-3xl font-bold text-[#29231F] mt-2">
@@ -215,7 +223,7 @@ export default function AdminOverviewPage() {
                 </span>
               </div>
               <div className="text-xs text-[#29231F]/70 mt-1">
-                {data.summary.pending} pending check-in
+                {data.summary.pending} {at.overview.pendingCheckin}
               </div>
             </div>
           </div>
@@ -235,7 +243,7 @@ export default function AdminOverviewPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-xs font-semibold uppercase tracking-wider text-[#5B1717]">
-                          {b.name} • {b.nameTe}
+                          {lang === "te" ? b.nameTe : b.name}
                         </span>
                         <h3 className="font-editorial text-2xl font-bold text-[#29231F] flex items-center gap-1.5 mt-0.5">
                           <Clock className="w-4 h-4 text-[#B58A45]" />
@@ -249,14 +257,14 @@ export default function AdminOverviewPage() {
                             : "bg-[#52664B]/15 text-[#52664B]"
                         }`}
                       >
-                        {b.isFull ? "FULL" : `${b.remaining} left`}
+                        {b.isFull ? at.overview.full : `${b.remaining} ${at.overview.left}`}
                       </span>
                     </div>
 
                     <div className="mt-4">
                       <div className="flex justify-between text-xs font-medium text-[#29231F]/75 mb-1">
                         <span>
-                          Registered: {b.bookedCount} / {b.capacity}
+                          {at.overview.registeredColon} {b.bookedCount} / {b.capacity}
                         </span>
                         <span>{pct}%</span>
                       </div>
@@ -272,19 +280,19 @@ export default function AdminOverviewPage() {
 
                     <div className="grid grid-cols-3 gap-2 mt-4 text-center bg-[#F8F3E9] rounded-lg p-2.5 border border-[#E9DDC9]">
                       <div>
-                        <div className="text-[11px] text-[#29231F]/60">Present</div>
+                        <div className="text-[11px] text-[#29231F]/60">{at.overview.present}</div>
                         <div className="text-sm font-bold text-[#52664B]">
                           {b.attendedRegistered + b.walkIns}
                         </div>
                       </div>
                       <div>
-                        <div className="text-[11px] text-[#29231F]/60">Pending</div>
+                        <div className="text-[11px] text-[#29231F]/60">{at.overview.pending}</div>
                         <div className="text-sm font-bold text-[#B58A45]">
                           {b.pending}
                         </div>
                       </div>
                       <div>
-                        <div className="text-[11px] text-[#29231F]/60">No-show</div>
+                        <div className="text-[11px] text-[#29231F]/60">{at.overview.noShow}</div>
                         <div className="text-sm font-bold text-[#A83224]">
                           {b.noShows}
                         </div>
@@ -297,7 +305,7 @@ export default function AdminOverviewPage() {
                     className="w-full py-2.5 rounded-lg bg-[#5B1717] hover:bg-[#3E0F0F] text-[#F8F3E9] text-xs font-semibold text-center flex items-center justify-center gap-1.5 transition"
                   >
                     <CheckCircle2 className="w-4 h-4 text-[#E9DDC9]" />
-                    Mark Attendance & Walk-ins
+                    {at.overview.markBtn}
                   </Link>
                 </div>
               );
