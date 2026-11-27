@@ -63,8 +63,9 @@ export default function AdminSettingsPage() {
     load();
     const origin =
       typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
-    setQrUrl(origin);
-    fetch(`/api/admin/qr?url=${encodeURIComponent(origin)}`)
+    const regUrl = `${origin}/register`;
+    setQrUrl(regUrl);
+    fetch(`/api/admin/qr?url=${encodeURIComponent(regUrl)}`)
       .then((r) => r.json())
       .then((j) => setQrDataUrl(j.dataUrl || null))
       .catch(() => {});

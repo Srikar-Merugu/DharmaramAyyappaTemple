@@ -5,10 +5,10 @@ import { requireAdmin } from "@/lib/auth";
 export async function GET(req: NextRequest) {
   try {
     await requireAdmin();
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const targetUrl =
       req.nextUrl.searchParams.get("url") ||
-      process.env.NEXT_PUBLIC_APP_URL ||
-      "http://localhost:3000";
+      `${baseUrl.replace(/\/$/, "")}/register`;
 
     const dataUrl = await QRCode.toDataURL(targetUrl, {
       width: 512,

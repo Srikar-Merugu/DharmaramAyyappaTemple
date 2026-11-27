@@ -87,7 +87,11 @@ function makeIdempotencyKey() {
   return `idemp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export default function PublicRegistrationApp() {
+export default function PublicRegistrationApp({
+  mode = "full",
+}: {
+  mode?: "full" | "register";
+}) {
   const [lang, setLang] = useState<Language>("te");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [data, setData] = useState<AvailabilityResponse | null>(null);
@@ -424,15 +428,24 @@ export default function PublicRegistrationApp() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[#29231F]/80">
-            {navLinks.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
+            {mode === "register" ? (
+              <Link
+                href="/"
                 className="hover:text-[#5B1717] transition-colors py-1"
               >
-                {l.label}
-              </a>
-            ))}
+                ← {dict.navHome}
+              </Link>
+            ) : (
+              navLinks.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  className="hover:text-[#5B1717] transition-colors py-1"
+                >
+                  {l.label}
+                </a>
+              ))
+            )}
           </nav>
 
           {/* Language Switcher + Mobile Menu */}
@@ -495,7 +508,9 @@ export default function PublicRegistrationApp() {
       </header>
 
       <main className="flex-1">
-        {/* B. HERO SECTION */}
+        {mode === "full" && (
+          <>
+            {/* B. HERO SECTION */}
         <section
           id="home"
           className="relative min-h-[520px] sm:min-h-[580px] flex items-center bg-[#29231F] overflow-hidden"
@@ -729,6 +744,8 @@ export default function PublicRegistrationApp() {
             )}
           </div>
         </section>
+          </>
+        )}
 
         {/* E. MOBILE-FIRST REGISTRATION SECTION */}
         <section id="register" className="py-14 sm:py-20 border-b border-[#E9DDC9]">
