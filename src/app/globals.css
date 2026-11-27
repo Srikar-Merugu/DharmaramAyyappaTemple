@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-sans), var(--font-telugu-sans), system-ui, sans-serif;
-  --font-serif: var(--font-serif), var(--font-telugu-serif), Georgia, serif;
+  --font-sans: var(--font-sans), var(--font-telugu-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: var(--font-serif), var(--font-telugu-sans), Georgia, serif;
 }
 
 :root {
@@ -10,14 +10,19 @@
   --temple-maroon-dark: #3E0F0F;
   --temple-vermilion: #A83224;
   --temple-gold: #B58A45;
-  --temple-ivory: #F8F3E9;
-  --temple-sandstone: #E9DDC9;
-  --temple-charcoal: #29231F;
-  --temple-leaf: #52664B;
+  --temple-ivory: #FAF7F2;
+  --temple-sandstone: #E7DFD3;
+  --temple-charcoal: #1F1B18;
+  --temple-leaf: #4B6344;
 }
 
 .font-editorial {
-  font-family: var(--font-serif), var(--font-telugu-serif), Georgia, serif;
+  font-family: var(--font-serif), var(--font-telugu-sans), Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 .temple-rule {
@@ -31,31 +36,7 @@
   content: "";
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(181, 138, 69, 0.55), transparent);
-}
-
-@keyframes gentleFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-gentle-in {
-  animation: gentleFadeUp 0.45s ease-out both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-gentle-in {
-    animation: none;
-  }
-  html {
-    scroll-behavior: auto !important;
-  }
+  background: linear-gradient(90deg, transparent, rgba(181, 138, 69, 0.5), transparent);
 }
 
 @media print {

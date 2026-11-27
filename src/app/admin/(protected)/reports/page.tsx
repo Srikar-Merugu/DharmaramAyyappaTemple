@@ -81,12 +81,9 @@ export default function AdminReportsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
         <div>
-          <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
+          <h1 className="font-editorial text-2xl sm:text-3xl text-[#1F1B18]">
             {at.reports.title}
           </h1>
-          <p className="text-sm text-[#29231F]/70">
-            {at.reports.subtitle}
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

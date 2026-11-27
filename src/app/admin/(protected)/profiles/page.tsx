@@ -71,12 +71,9 @@ export default function AdminProfilesPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
+        <h1 className="font-editorial text-2xl sm:text-3xl text-[#1F1B18]">
           {at.profiles.title}
         </h1>
-        <p className="text-sm text-[#29231F]/70">
-          {at.profiles.subtitle}
-        </p>
       </div>
 
       <div className="relative max-w-md">

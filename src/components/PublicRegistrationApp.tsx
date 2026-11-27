@@ -9,9 +9,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock,
-  MapPin,
   Menu,
-  Phone,
   Plus,
   ShieldCheck,
   Trash2,
@@ -98,18 +96,17 @@ export default function PublicRegistrationApp({
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Registration flow: "select" | "details" | "review" | "confirmed"
-  const [regStep, setRegStep] = useState<"select" | "details" | "review" | "confirmed">("select");
+  const [regStep, setRegStep] = useState<
+    "select" | "details" | "review" | "confirmed"
+  >("select");
   const [regType, setRegType] = useState<"individual" | "group">("individual");
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedBatchId, setSelectedBatchId] = useState<string>("");
 
-  // Individual fields
   const [indName, setIndName] = useState("");
   const [indPhone, setIndPhone] = useState("");
   const [indVillage, setIndVillage] = useState("");
 
-  // Group fields
   const [groupName, setGroupName] = useState("");
   const [leaderName, setLeaderName] = useState("");
   const [leaderPhone, setLeaderPhone] = useState("");
@@ -124,7 +121,6 @@ export default function PublicRegistrationApp({
   const [idempotencyKey, setIdempotencyKey] = useState<string>("");
   const [confirmation, setConfirmation] = useState<ConfirmationData | null>(null);
 
-  // Self-cancel modal
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelCode, setCancelCode] = useState("");
   const [cancelStatus, setCancelStatus] = useState<{
@@ -153,7 +149,7 @@ export default function PublicRegistrationApp({
       setLoading(true);
       setLoadError(null);
       const res = await fetch("/api/public/availability", { cache: "no-store" });
-      if (!res.ok) throw new Error("Failed to load");
+      if (!res.ok) throw new Error("Failed");
       const json: AvailabilityResponse = await res.json();
       setData(json);
 
@@ -168,11 +164,7 @@ export default function PublicRegistrationApp({
         setSelectedDate((prev) => prev || json.dates[0].date);
       }
     } catch {
-      setLoadError(
-        lang === "te"
-          ? "సమాచారం లోడ్ చేయడంలో లోపం జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి."
-          : "Unable to load schedule. Please refresh the page."
-      );
+      setLoadError(lang === "te" ? "లోపం జరిగింది." : "Unable to load schedule.");
     } finally {
       setLoading(false);
     }
@@ -331,7 +323,7 @@ export default function PublicRegistrationApp({
 
       const json = await res.json();
       if (!res.ok) {
-        setFormError(json.error || "Registration failed.");
+        setFormError(json.error || "Failed.");
         setRegStep("details");
         await fetchAvailability();
         return;
@@ -341,11 +333,7 @@ export default function PublicRegistrationApp({
       setRegStep("confirmed");
       await fetchAvailability();
     } catch {
-      setFormError(
-        lang === "te"
-          ? "నెట్‌వర్క్ లోపం. దయచేసి మళ్లీ ప్రయత్నించండి."
-          : "Network error. Please retry safely."
-      );
+      setFormError("Network error.");
     } finally {
       setSubmitting(false);
     }
@@ -380,88 +368,64 @@ export default function PublicRegistrationApp({
       });
       const json = await res.json();
       if (!res.ok) {
-        setCancelStatus({ type: "error", msg: json.error || "Cancellation failed." });
+        setCancelStatus({ type: "error", msg: json.error || "Failed." });
       } else {
         setCancelStatus({ type: "success", msg: dict.cancelSuccess });
         setCancelCode("");
         await fetchAvailability();
       }
     } catch {
-      setCancelStatus({ type: "error", msg: "Network error. Please try again." });
+      setCancelStatus({ type: "error", msg: "Network error." });
     } finally {
       setCancelling(false);
     }
   };
 
-  const navLinks = [
-    { href: "#home", label: dict.navHome },
-    { href: "#about", label: dict.navAbout },
-    { href: "#schedule", label: dict.navSchedule },
-    { href: "#register", label: dict.navRegister },
-    { href: "#contact", label: dict.navContact },
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F3E9] text-[#29231F]">
-      {/* A. Minimal, Dignified Temple Navigation */}
-      <header className="sticky top-0 z-40 bg-[#F8F3E9]/95 backdrop-blur-sm border-b border-[#E9DDC9]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          <a href="#home" className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-full bg-[#5B1717] border border-[#B58A45] flex items-center justify-center shrink-0">
-              <span className="text-[#F8F3E9] font-editorial text-lg font-semibold leading-none">
-                ॐ
-              </span>
+    <div className="min-h-screen flex flex-col bg-[#FAF7F2] text-[#1F1B18]">
+      {/* Minimal Header */}
+      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-sm border-b border-[#E7DFD3]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-[#5B1717] flex items-center justify-center shrink-0">
+              <span className="font-editorial text-sm text-[#FAF7F2]">ॐ</span>
             </div>
-            <div className="min-w-0">
-              <p className="text-[10px] tracking-[0.16em] uppercase text-[#5B1717] font-semibold truncate">
-                {dict.swamiSaranam}
-              </p>
-              <p className="font-editorial text-base sm:text-lg font-bold text-[#29231F] truncate leading-tight">
-                {data
-                  ? lang === "te"
-                    ? data.temple.nameTe
-                    : data.temple.name
-                  : dict.annadanamTitle}
-              </p>
-            </div>
-          </a>
+            <span className="font-editorial text-lg sm:text-xl text-[#1F1B18] truncate">
+              {data
+                ? lang === "te"
+                  ? data.temple.nameTe
+                  : data.temple.name
+                : dict.annadanamTitle}
+            </span>
+          </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[#29231F]/80">
-            {mode === "register" ? (
+          <div className="flex items-center gap-4 shrink-0">
+            {mode === "full" ? (
+              <nav className="hidden sm:flex items-center gap-6 text-sm font-medium text-[#1F1B18]/75">
+                <a href="#schedule" className="hover:text-[#5B1717]">
+                  {dict.navSchedule}
+                </a>
+                <a href="#register" className="hover:text-[#5B1717]">
+                  {dict.navRegister}
+                </a>
+              </nav>
+            ) : (
               <Link
                 href="/"
-                className="hover:text-[#5B1717] transition-colors py-1"
+                className="hidden sm:inline text-sm font-medium text-[#1F1B18]/75 hover:text-[#5B1717]"
               >
                 ← {dict.navHome}
               </Link>
-            ) : (
-              navLinks.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  className="hover:text-[#5B1717] transition-colors py-1"
-                >
-                  {l.label}
-                </a>
-              ))
             )}
-          </nav>
 
-          {/* Language Switcher + Mobile Menu */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div
-              className="inline-flex items-center rounded-full border border-[#B58A45]/50 bg-[#E9DDC9]/50 p-0.5"
-              role="group"
-              aria-label="Language selector"
-            >
+            <div className="inline-flex items-center rounded-full border border-[#E7DFD3] bg-white p-0.5">
               <button
                 type="button"
                 onClick={() => toggleLang("te")}
                 className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
                   lang === "te"
-                    ? "bg-[#5B1717] text-[#F8F3E9]"
-                    : "text-[#29231F] hover:text-[#5B1717]"
+                    ? "bg-[#5B1717] text-[#FAF7F2]"
+                    : "text-[#1F1B18]/70 hover:text-[#1F1B18]"
                 }`}
               >
                 తెలుగు
@@ -471,38 +435,43 @@ export default function PublicRegistrationApp({
                 onClick={() => toggleLang("en")}
                 className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
                   lang === "en"
-                    ? "bg-[#5B1717] text-[#F8F3E9]"
-                    : "text-[#29231F] hover:text-[#5B1717]"
+                    ? "bg-[#5B1717] text-[#FAF7F2]"
+                    : "text-[#1F1B18]/70 hover:text-[#1F1B18]"
                 }`}
               >
-                English
+                EN
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen((v) => !v)}
-              className="md:hidden p-2 rounded-lg border border-[#E9DDC9] text-[#29231F]"
-              aria-label="Toggle navigation menu"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+            {mode === "full" && (
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen((v) => !v)}
+                className="sm:hidden p-1.5 rounded-lg border border-[#E7DFD3]"
+                aria-label="Menu"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Mobile Drawer */}
-        {mobileMenuOpen && (
-          <nav className="md:hidden border-t border-[#E9DDC9] bg-[#F8F3E9] px-4 py-3 space-y-1">
-            {navLinks.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="block py-2.5 px-2 text-sm font-medium text-[#29231F] hover:text-[#5B1717] rounded-lg hover:bg-[#E9DDC9]/40"
-              >
-                {l.label}
-              </a>
-            ))}
+        {mobileMenuOpen && mode === "full" && (
+          <nav className="sm:hidden border-t border-[#E7DFD3] bg-[#FAF7F2] px-4 py-2 flex gap-4 text-sm font-medium">
+            <a
+              href="#schedule"
+              onClick={() => setMobileMenuOpen(false)}
+              className="py-2"
+            >
+              {dict.navSchedule}
+            </a>
+            <a
+              href="#register"
+              onClick={() => setMobileMenuOpen(false)}
+              className="py-2"
+            >
+              {dict.navRegister}
+            </a>
           </nav>
         )}
       </header>
@@ -510,929 +479,719 @@ export default function PublicRegistrationApp({
       <main className="flex-1">
         {mode === "full" && (
           <>
-            {/* B. HERO SECTION */}
-        <section
-          id="home"
-          className="relative min-h-[520px] sm:min-h-[580px] flex items-center bg-[#29231F] overflow-hidden"
-        >
-          {/* Replacement point: swap /images/hero-temple.jpg with the temple's own photograph */}
-          <Image
-            src="/images/hero-temple.jpg"
-            alt="Traditional South Indian temple stone mandapam illuminated by brass oil lamps"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center"
-          />
-          <div
-            className="absolute inset-0 bg-gradient-to-r from-[#29231F]/92 via-[#29231F]/75 to-[#29231F]/35"
-            aria-hidden="true"
-          />
-
-          <div className="relative z-10 max-w-6xl mx-auto w-full px-4 sm:px-6 py-16 sm:py-24">
-            <div className="max-w-2xl space-y-5 animate-gentle-in">
-              <p className="text-xs sm:text-sm tracking-[0.2em] uppercase text-[#E9DDC9] font-semibold">
-                {dict.heroEyebrow}
-              </p>
-
-              <h1 className="font-editorial text-3xl sm:text-5xl lg:text-6xl font-semibold text-[#F8F3E9] leading-[1.15]">
-                {dict.heroTitle}
-              </h1>
-
-              <p className="text-base sm:text-lg text-[#E9DDC9]/90 leading-relaxed max-w-xl">
-                {dict.heroSubtitle}
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <a
-                  href="#register"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#5B1717] hover:bg-[#3E0F0F] border border-[#B58A45]/70 text-[#F8F3E9] font-semibold text-sm sm:text-base transition"
-                >
-                  {dict.heroPrimaryCta}
-                  <ChevronRight className="w-4 h-4" />
-                </a>
-                <a
-                  href="#schedule"
-                  className="inline-flex items-center justify-center px-6 py-3.5 rounded-lg border border-[#E9DDC9]/60 bg-[#29231F]/40 hover:bg-[#29231F]/70 text-[#F8F3E9] font-medium text-sm sm:text-base transition"
-                >
-                  {dict.heroSecondaryCta}
-                </a>
+            {/* HERO: Clean, Visual, Minimal Text */}
+            <section className="relative h-[440px] sm:h-[500px] flex items-center bg-[#1F1B18] overflow-hidden">
+              <Image
+                src="/images/hero-temple.jpg"
+                alt="Sri Ayyappa Swamy Temple"
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover object-center"
+              />
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-[#1F1B18]/85 via-[#1F1B18]/55 to-transparent"
+                aria-hidden="true"
+              />
+              <div className="relative z-10 max-w-5xl mx-auto w-full px-4 sm:px-6 space-y-5">
+                <p className="text-xs tracking-[0.2em] uppercase text-[#E7DFD3] font-semibold">
+                  {dict.swamiSaranam}
+                </p>
+                <h1 className="font-editorial text-4xl sm:text-6xl text-[#FAF7F2] leading-[1.1] max-w-lg">
+                  {dict.heroTitle}
+                </h1>
+                <p className="text-sm sm:text-base text-[#E7DFD3] font-medium tabular-nums">
+                  {dict.heroSub}
+                </p>
+                <div className="flex items-center gap-3 pt-1">
+                  <a
+                    href="#register"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#5B1717] hover:bg-[#3E0F0F] text-[#FAF7F2] text-sm font-semibold transition"
+                  >
+                    {dict.heroPrimaryCta}
+                    <ChevronRight className="w-4 h-4" />
+                  </a>
+                  <a
+                    href="#schedule"
+                    className="px-5 py-3 rounded-lg border border-[#E7DFD3]/50 text-[#FAF7F2] hover:bg-white/10 text-sm font-medium transition"
+                  >
+                    {dict.heroSecondaryCta}
+                  </a>
+                </div>
               </div>
+            </section>
 
-              <p className="pt-3 text-xs tracking-[0.18em] uppercase text-[#B58A45] font-semibold">
-                {dict.swamiSaranam}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* C. ANNADANAM INTRODUCTION */}
-        <section id="about" className="py-14 sm:py-20 border-b border-[#E9DDC9]">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-              <div className="lg:col-span-6 space-y-5">
-                <p className="text-xs tracking-[0.18em] uppercase text-[#5B1717] font-semibold">
-                  {dict.aboutEyebrow}
-                </p>
-                <h2 className="font-editorial text-3xl sm:text-4xl font-semibold text-[#29231F] leading-tight">
-                  {dict.aboutTitle}
-                </h2>
-                <div className="w-16 h-0.5 bg-[#B58A45]" />
-                <p className="text-[#29231F]/85 text-base leading-relaxed">
-                  {dict.aboutBody1}
-                </p>
-                <p className="text-[#29231F]/80 text-base leading-relaxed">
-                  {dict.aboutBody2}
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                  <div className="p-4 rounded-lg bg-white/70 border border-[#E9DDC9]">
-                    <div className="font-semibold text-sm text-[#5B1717]">
-                      {dict.aboutHighlight1Title}
+            {/* VISUAL STRIP + LIVE SCHEDULE */}
+            <section id="schedule" className="py-12 sm:py-16 border-b border-[#E7DFD3]">
+              <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-10">
+                {/* 2 Photos + 3 Key Facts */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                  <div className="md:col-span-7 grid grid-cols-2 gap-4">
+                    <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-[#E7DFD3]">
+                      <Image
+                        src="/images/annadanam-meal.jpg"
+                        alt="Annadanam Meal"
+                        fill
+                        loading="lazy"
+                        sizes="(max-width: 768px) 50vw, 30vw"
+                        className="object-cover"
+                      />
                     </div>
-                    <div className="text-xs text-[#29231F]/75 mt-1 leading-relaxed">
-                      {dict.aboutHighlight1Desc}
+                    <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-[#E7DFD3]">
+                      <Image
+                        src="/images/annadanam-lamps.jpg"
+                        alt="Temple Lamps"
+                        fill
+                        loading="lazy"
+                        sizes="(max-width: 768px) 50vw, 30vw"
+                        className="object-cover"
+                      />
                     </div>
                   </div>
-                  <div className="p-4 rounded-lg bg-white/70 border border-[#E9DDC9]">
-                    <div className="font-semibold text-sm text-[#5B1717]">
-                      {dict.aboutHighlight2Title}
+                  <div className="md:col-span-5 grid grid-cols-1 gap-3">
+                    <div className="bg-white rounded-xl p-4 border border-[#E7DFD3] flex items-center justify-between">
+                      <span className="font-semibold text-sm text-[#5B1717]">
+                        {dict.stat1Title}
+                      </span>
+                      <span className="text-xs text-[#1F1B18]/70 tabular-nums">
+                        {dict.stat1Sub}
+                      </span>
                     </div>
-                    <div className="text-xs text-[#29231F]/75 mt-1 leading-relaxed">
-                      {dict.aboutHighlight2Desc}
+                    <div className="bg-white rounded-xl p-4 border border-[#E7DFD3] flex items-center justify-between">
+                      <span className="font-semibold text-sm text-[#5B1717]">
+                        {dict.stat2Title}
+                      </span>
+                      <span className="text-xs text-[#1F1B18]/70 tabular-nums">
+                        {dict.stat2Sub}
+                      </span>
                     </div>
-                  </div>
-                  <div className="p-4 rounded-lg bg-white/70 border border-[#E9DDC9]">
-                    <div className="font-semibold text-sm text-[#5B1717]">
-                      {dict.aboutHighlight3Title}
-                    </div>
-                    <div className="text-xs text-[#29231F]/75 mt-1 leading-relaxed">
-                      {dict.aboutHighlight3Desc}
+                    <div className="bg-white rounded-xl p-4 border border-[#E7DFD3] flex items-center justify-between">
+                      <span className="font-semibold text-sm text-[#5B1717]">
+                        {dict.stat3Title}
+                      </span>
+                      <span className="text-xs text-[#1F1B18]/70">
+                        {dict.stat3Sub}
+                      </span>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="lg:col-span-6 grid grid-cols-2 gap-4">
-                {/* Replacement point: /images/annadanam-meal.jpg */}
-                <div className="relative aspect-[4/5] rounded-lg overflow-hidden border border-[#E9DDC9] bg-[#E9DDC9]">
-                  <Image
-                    src="/images/annadanam-meal.jpg"
-                    alt="Traditional South Indian vegetarian Annadanam meal served on a fresh banana leaf"
-                    fill
-                    loading="lazy"
-                    sizes="(max-width: 1024px) 50vw, 25vw"
-                    className="object-cover"
-                  />
-                </div>
-                {/* Replacement point: /images/annadanam-lamps.jpg */}
-                <div className="relative aspect-[4/5] rounded-lg overflow-hidden border border-[#E9DDC9] bg-[#E9DDC9] mt-6">
-                  <Image
-                    src="/images/annadanam-lamps.jpg"
-                    alt="Traditional brass nilavilakku temple lamps lit with warm flames"
-                    fill
-                    loading="lazy"
-                    sizes="(max-width: 1024px) 50vw, 25vw"
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* D. DAILY SCHEDULE SECTION */}
-        <section id="schedule" className="py-14 sm:py-20 bg-[#E9DDC9]/35 border-b border-[#E9DDC9]">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8">
-            <div className="max-w-2xl space-y-2">
-              <p className="text-xs tracking-[0.18em] uppercase text-[#5B1717] font-semibold">
-                {data?.temple.seasonName || dict.swamiSaranam}
-              </p>
-              <h2 className="font-editorial text-3xl sm:text-4xl font-semibold text-[#29231F]">
-                {dict.timingsTitle}
-              </h2>
-              <p className="text-sm sm:text-base text-[#29231F]/75">
-                {dict.scheduleSubtitle}
-              </p>
-            </div>
-
-            {loading && !data ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-40 rounded-lg bg-white/70 border border-[#E9DDC9] animate-pulse"
-                  />
-                ))}
-              </div>
-            ) : loadError ? (
-              <div className="bg-white rounded-lg border border-[#A83224]/30 p-6 text-center">
-                <p className="text-sm text-[#A83224] font-medium">{loadError}</p>
-                <button
-                  type="button"
-                  onClick={fetchAvailability}
-                  className="mt-3 px-4 py-2 rounded-lg bg-[#5B1717] text-[#F8F3E9] text-xs font-semibold"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : (
-              data && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    {batchesForSelectedDate.map((b) => {
-                      const pct = Math.min(
-                        100,
-                        Math.round((b.bookedCount / b.capacity) * 100)
-                      );
-                      return (
+                {/* Live Batch Availability */}
+                {data && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-editorial text-2xl sm:text-3xl text-[#1F1B18]">
+                        {dict.timingsTitle}
+                      </h2>
+                      <span className="text-xs font-mono text-[#1F1B18]/60 tabular-nums">
+                        IST {data.currentIST.timeStr}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {batchesForSelectedDate.map((b) => (
                         <div
                           key={b.batchId}
-                          className="bg-[#F8F3E9] rounded-lg border border-[#E9DDC9] p-6 flex flex-col justify-between space-y-4"
+                          className="bg-white rounded-xl border border-[#E7DFD3] p-5 flex items-center justify-between"
                         >
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <span className="text-xs font-semibold uppercase tracking-wider text-[#5B1717]">
-                                {lang === "te" ? b.nameTe : b.name}
-                              </span>
-                              <div className="font-editorial text-3xl font-bold text-[#29231F] mt-1">
-                                {b.displayTime}
-                              </div>
+                          <div>
+                            <div className="text-xs font-semibold text-[#5B1717]">
+                              {lang === "te" ? b.nameTe : b.name}
                             </div>
-                            <span
-                              className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                                b.isFull
-                                  ? "bg-[#A83224]/15 text-[#A83224]"
-                                  : "bg-[#52664B]/15 text-[#52664B]"
-                              }`}
-                            >
-                              {b.isFull ? dict.full : `${b.remaining} ${dict.seatsLeft}`}
-                            </span>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <div className="flex justify-between text-xs text-[#29231F]/70">
-                              <span>
-                                {dict.registered}: {b.bookedCount} / {b.capacity}
-                              </span>
-                              <span>{pct}%</span>
-                            </div>
-                            <div className="w-full h-1.5 bg-[#E9DDC9] rounded-full overflow-hidden">
-                              <div
-                                className={`h-full transition-all ${
-                                  b.isFull ? "bg-[#A83224]" : "bg-[#52664B]"
-                                }`}
-                                style={{ width: `${pct}%` }}
-                              />
+                            <div className="font-editorial text-2xl text-[#1F1B18] mt-0.5 tabular-nums">
+                              {b.displayTime}
                             </div>
                           </div>
+                          <span
+                            className={`text-xs font-semibold px-3 py-1 rounded-full tabular-nums ${
+                              b.isFull
+                                ? "bg-[#A83224]/12 text-[#A83224]"
+                                : "bg-[#4B6344]/12 text-[#4B6344]"
+                            }`}
+                          >
+                            {b.isFull
+                              ? dict.full
+                              : `${b.remaining}/${b.capacity} ${dict.seatsLeft}`}
+                          </span>
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#29231F]/75 pt-1">
-                    <span>
-                      • {dict.batchCapacityNote} &nbsp;|&nbsp; • {dict.cutoffNote}
-                    </span>
-                    <span className="font-mono text-[11px] text-[#5B1717]">
-                      IST: {data.currentIST.timeStr}
-                    </span>
-                  </div>
-                </>
-              )
-            )}
-          </div>
-        </section>
+                )}
+              </div>
+            </section>
           </>
         )}
 
-        {/* E. MOBILE-FIRST REGISTRATION SECTION */}
+        {/* REGISTRATION CARD */}
         <section
           id="register"
-          className={
-            mode === "register"
-              ? "py-6 sm:py-10"
-              : "py-14 sm:py-20 border-b border-[#E9DDC9]"
-          }
+          className={mode === "register" ? "py-6 sm:py-10" : "py-12 sm:py-16"}
         >
-          <div className="max-w-2xl mx-auto px-4 sm:px-6">
-            <div className="text-center space-y-1 mb-6">
-              <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
-                {dict.annadanamTitle}
-              </h2>
-            </div>
+          <div className="max-w-xl mx-auto px-4 sm:px-6">
+            <h2 className="font-editorial text-2xl sm:text-3xl text-center text-[#1F1B18] mb-6">
+              {dict.annadanamTitle}
+            </h2>
 
-            {data && (
-              <div className="bg-white rounded-xl border border-[#E9DDC9] p-4 sm:p-7 shadow-sm">
-                {/* STEP 1: TYPE, DATE, BATCH */}
-                {regStep === "select" && (
-                  <div className="space-y-6">
-                    {formError && (
-                      <div className="p-3.5 rounded-lg bg-[#A83224]/10 border border-[#A83224]/30 text-[#A83224] text-sm flex items-start gap-2">
-                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                        <span>{formError}</span>
-                      </div>
-                    )}
+            {loading && !data ? (
+              <div className="bg-white rounded-xl border border-[#E7DFD3] p-8 text-center text-sm text-[#1F1B18]/60">
+                ...
+              </div>
+            ) : loadError ? (
+              <div className="bg-white rounded-xl border border-[#A83224]/30 p-6 text-center text-sm text-[#A83224]">
+                {loadError}
+              </div>
+            ) : (
+              data && (
+                <div className="bg-white rounded-2xl border border-[#E7DFD3] p-5 sm:p-7 shadow-sm">
+                  {regStep === "select" && (
+                    <div className="space-y-6">
+                      {formError && (
+                        <div className="p-3 rounded-lg bg-[#A83224]/10 text-[#A83224] text-sm flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          <span>{formError}</span>
+                        </div>
+                      )}
 
-                    {/* Registration Type */}
-                    <div>
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-[#29231F]/70 mb-2.5">
-                        1. {dict.chooseType}
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setRegType("individual")}
-                          className={`p-3.5 rounded-xl border-2 text-left transition-all flex items-center justify-between gap-2 active:scale-[0.98] ${
-                            regType === "individual"
-                              ? "border-[#5B1717] bg-[#5B1717] text-[#F8F3E9] shadow-sm"
-                              : "border-[#E9DDC9] bg-[#F8F3E9]/50 text-[#29231F] hover:border-[#B58A45]"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <User className="w-5 h-5 shrink-0" />
-                            <span className="font-semibold text-sm sm:text-base truncate">
+                      {/* 1. Type */}
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-[#1F1B18]/60 mb-2">
+                          1. {dict.chooseType}
+                        </label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setRegType("individual")}
+                            className={`p-3.5 rounded-xl border-2 text-left transition-all flex items-center justify-between active:scale-[0.98] ${
+                              regType === "individual"
+                                ? "border-[#5B1717] bg-[#5B1717] text-[#FAF7F2]"
+                                : "border-[#E7DFD3] bg-[#FAF7F2]/60 text-[#1F1B18] hover:border-[#B58A45]"
+                            }`}
+                          >
+                            <span className="flex items-center gap-2 font-semibold text-sm">
+                              <User className="w-4 h-4" />
                               {dict.individualTitle}
                             </span>
-                          </div>
-                          {regType === "individual" && (
-                            <CheckCircle2 className="w-5 h-5 shrink-0 text-[#F8F3E9]" />
-                          )}
-                        </button>
+                            {regType === "individual" && (
+                              <CheckCircle2 className="w-4 h-4 shrink-0" />
+                            )}
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => setRegType("group")}
-                          className={`p-3.5 rounded-xl border-2 text-left transition-all flex items-center justify-between gap-2 active:scale-[0.98] ${
-                            regType === "group"
-                              ? "border-[#5B1717] bg-[#5B1717] text-[#F8F3E9] shadow-sm"
-                              : "border-[#E9DDC9] bg-[#F8F3E9]/50 text-[#29231F] hover:border-[#B58A45]"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <Users className="w-5 h-5 shrink-0" />
-                            <span className="font-semibold text-sm sm:text-base truncate">
+                          <button
+                            type="button"
+                            onClick={() => setRegType("group")}
+                            className={`p-3.5 rounded-xl border-2 text-left transition-all flex items-center justify-between active:scale-[0.98] ${
+                              regType === "group"
+                                ? "border-[#5B1717] bg-[#5B1717] text-[#FAF7F2]"
+                                : "border-[#E7DFD3] bg-[#FAF7F2]/60 text-[#1F1B18] hover:border-[#B58A45]"
+                            }`}
+                          >
+                            <span className="flex items-center gap-2 font-semibold text-sm">
+                              <Users className="w-4 h-4" />
                               {dict.groupTitle}
                             </span>
-                          </div>
-                          {regType === "group" && (
-                            <CheckCircle2 className="w-5 h-5 shrink-0 text-[#F8F3E9]" />
-                          )}
-                        </button>
+                            {regType === "group" && (
+                              <CheckCircle2 className="w-4 h-4 shrink-0" />
+                            )}
+                          </button>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Date Picker */}
-                    <div>
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-[#29231F]/70 mb-2.5 flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-[#5B1717]" />
-                        2. {dict.selectDate}
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                        {data.dates.map((d, idx) => {
-                          const isSelected = selectedDate === d.date;
-                          const dayTag =
-                            idx === 0
-                              ? dict.today
-                              : idx === 1
-                              ? dict.tomorrow
-                              : dict.dayAfter;
-                          return (
-                            <button
-                              key={d.date}
-                              type="button"
-                              disabled={!d.available}
-                              onClick={() => {
-                                setSelectedDate(d.date);
-                                setSelectedBatchId("");
-                                setFormError(null);
-                              }}
-                              className={`p-3.5 rounded-xl border-2 text-left transition-all flex items-center justify-between gap-2 active:scale-[0.98] ${
-                                !d.available
-                                  ? "bg-[#E9DDC9]/30 border-[#E9DDC9] text-[#29231F]/40 cursor-not-allowed"
-                                  : isSelected
-                                  ? "border-[#5B1717] bg-[#5B1717] text-[#F8F3E9] shadow-sm"
-                                  : "border-[#E9DDC9] bg-[#F8F3E9]/50 text-[#29231F] hover:border-[#B58A45]"
-                              }`}
-                            >
-                              <div>
-                                <div
-                                  className={`text-[11px] font-semibold uppercase tracking-wider ${
-                                    isSelected ? "text-[#E9DDC9]" : "text-[#5B1717]"
-                                  }`}
-                                >
-                                  {dayTag}
-                                </div>
-                                <div className="text-sm font-semibold mt-0.5">
-                                  {formatDateLabel(d.date, lang)}
-                                </div>
-                                {!d.available && d.reason && (
-                                  <div className="text-[11px] text-[#A83224] mt-0.5">
-                                    {dict.reasons[d.reason]}
-                                  </div>
-                                )}
-                              </div>
-                              {isSelected && d.available && (
-                                <CheckCircle2 className="w-5 h-5 shrink-0 text-[#F8F3E9]" />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Batch Selector */}
-                    <div>
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-[#29231F]/70 mb-2.5 flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-[#5B1717]" />
-                        3. {dict.selectBatch}
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                        {batchesForSelectedDate.map((b) => {
-                          const isSelected = selectedBatchId === b.batchId;
-                          const dateAvail = data.dates.find(
-                            (d) => d.date === selectedDate
-                          )?.available;
-                          const disabled = b.isFull || !dateAvail;
-                          return (
-                            <button
-                              key={b.batchId}
-                              type="button"
-                              disabled={disabled}
-                              onClick={() => {
-                                setSelectedBatchId(b.batchId);
-                                setFormError(null);
-                              }}
-                              className={`p-3.5 rounded-xl border-2 text-left transition-all active:scale-[0.98] ${
-                                disabled
-                                  ? "bg-[#E9DDC9]/30 border-[#E9DDC9] text-[#29231F]/40 cursor-not-allowed"
-                                  : isSelected
-                                  ? "border-[#5B1717] bg-[#5B1717] text-[#F8F3E9] shadow-sm"
-                                  : "border-[#E9DDC9] bg-[#F8F3E9]/50 text-[#29231F] hover:border-[#B58A45]"
-                              }`}
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <span
-                                  className={`text-xs font-semibold ${
-                                    isSelected ? "text-[#E9DDC9]" : "text-[#5B1717]"
-                                  }`}
-                                >
-                                  {lang === "te" ? b.nameTe : b.name}
-                                </span>
-                                {isSelected ? (
-                                  <CheckCircle2 className="w-4 h-4 text-[#F8F3E9]" />
-                                ) : (
-                                  <span
-                                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                                      b.isFull
-                                        ? "bg-[#A83224]/15 text-[#A83224]"
-                                        : "bg-[#52664B]/15 text-[#52664B]"
+                      {/* 2. Date */}
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-[#1F1B18]/60 mb-2 flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-[#5B1717]" />
+                          2. {dict.selectDate}
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                          {data.dates.map((d, idx) => {
+                            const isSelected = selectedDate === d.date;
+                            const dayTag =
+                              idx === 0
+                                ? dict.today
+                                : idx === 1
+                                ? dict.tomorrow
+                                : dict.dayAfter;
+                            return (
+                              <button
+                                key={d.date}
+                                type="button"
+                                disabled={!d.available}
+                                onClick={() => {
+                                  setSelectedDate(d.date);
+                                  setSelectedBatchId("");
+                                  setFormError(null);
+                                }}
+                                className={`p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between active:scale-[0.98] ${
+                                  !d.available
+                                    ? "bg-[#E7DFD3]/35 border-[#E7DFD3] text-[#1F1B18]/40 cursor-not-allowed"
+                                    : isSelected
+                                    ? "border-[#5B1717] bg-[#5B1717] text-[#FAF7F2]"
+                                    : "border-[#E7DFD3] bg-[#FAF7F2]/60 text-[#1F1B18] hover:border-[#B58A45]"
+                                }`}
+                              >
+                                <div>
+                                  <div
+                                    className={`text-[11px] font-semibold uppercase ${
+                                      isSelected ? "text-[#E7DFD3]" : "text-[#5B1717]"
                                     }`}
                                   >
-                                    {b.isFull ? dict.full : `${b.remaining} ${dict.seatsLeft}`}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="font-editorial text-2xl font-bold mt-1">
-                                {b.displayTime}
-                              </div>
-                              {isSelected && (
-                                <div className="text-[11px] text-[#E9DDC9] mt-0.5">
-                                  {b.remaining} {dict.seatsLeft}
+                                    {dayTag}
+                                  </div>
+                                  <div className="text-sm font-semibold mt-0.5">
+                                    {formatDateLabel(d.date, lang)}
+                                  </div>
+                                  {!d.available && d.reason && (
+                                    <div className="text-[11px] text-[#A83224] mt-0.5">
+                                      {dict.reasons[d.reason]}
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </button>
-                          );
-                        })}
+                                {isSelected && d.available && (
+                                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
 
-                    <button
-                      type="button"
-                      onClick={handleContinueToDetails}
-                      className="w-full py-3.5 rounded-xl bg-[#5B1717] hover:bg-[#3E0F0F] text-[#F8F3E9] font-semibold text-base transition flex items-center justify-center gap-2 active:scale-[0.99]"
-                    >
-                      {dict.registerCta}
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
+                      {/* 3. Batch */}
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-[#1F1B18]/60 mb-2 flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-[#5B1717]" />
+                          3. {dict.selectBatch}
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                          {batchesForSelectedDate.map((b) => {
+                            const isSelected = selectedBatchId === b.batchId;
+                            const dateAvail = data.dates.find(
+                              (d) => d.date === selectedDate
+                            )?.available;
+                            const disabled = b.isFull || !dateAvail;
+                            return (
+                              <button
+                                key={b.batchId}
+                                type="button"
+                                disabled={disabled}
+                                onClick={() => {
+                                  setSelectedBatchId(b.batchId);
+                                  setFormError(null);
+                                }}
+                                className={`p-3.5 rounded-xl border-2 text-left transition-all active:scale-[0.98] ${
+                                  disabled
+                                    ? "bg-[#E7DFD3]/35 border-[#E7DFD3] text-[#1F1B18]/40 cursor-not-allowed"
+                                    : isSelected
+                                    ? "border-[#5B1717] bg-[#5B1717] text-[#FAF7F2]"
+                                    : "border-[#E7DFD3] bg-[#FAF7F2]/60 text-[#1F1B18] hover:border-[#B58A45]"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span
+                                    className={`text-xs font-semibold ${
+                                      isSelected ? "text-[#E7DFD3]" : "text-[#5B1717]"
+                                    }`}
+                                  >
+                                    {lang === "te" ? b.nameTe : b.name}
+                                  </span>
+                                  {isSelected ? (
+                                    <CheckCircle2 className="w-4 h-4" />
+                                  ) : (
+                                    <span
+                                      className={`text-[11px] font-semibold tabular-nums ${
+                                        b.isFull ? "text-[#A83224]" : "text-[#4B6344]"
+                                      }`}
+                                    >
+                                      {b.isFull
+                                        ? dict.full
+                                        : `${b.remaining} ${dict.seatsLeft}`}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="font-editorial text-2xl mt-1 tabular-nums">
+                                  {b.displayTime}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
 
-                {/* STEP 2: MEMBER DETAILS */}
-                {regStep === "details" && (
-                  <form onSubmit={handleProceedToReview} className="space-y-6">
-                    <div className="flex items-center justify-between border-b border-[#E9DDC9] pb-3">
                       <button
                         type="button"
-                        onClick={() => {
-                          setFormError(null);
-                          setRegStep("select");
-                        }}
-                        className="text-sm font-semibold text-[#5B1717] hover:underline"
+                        onClick={handleContinueToDetails}
+                        className="w-full py-3.5 rounded-xl bg-[#5B1717] hover:bg-[#3E0F0F] text-[#FAF7F2] font-semibold text-base transition flex items-center justify-center gap-2"
                       >
-                        ← {dict.back}
+                        {dict.registerCta}
+                        <ChevronRight className="w-4 h-4" />
                       </button>
-                      <div className="text-xs font-medium text-[#29231F]/75">
-                        {formatDateLabel(selectedDate, lang)} •{" "}
-                        {selectedBatch?.displayTime}
-                      </div>
                     </div>
+                  )}
 
-                    {formError && (
-                      <div className="p-3.5 rounded-lg bg-[#A83224]/10 border border-[#A83224]/30 text-[#A83224] text-sm flex items-start gap-2">
-                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                        <span>{formError}</span>
+                  {regStep === "details" && (
+                    <form onSubmit={handleProceedToReview} className="space-y-5">
+                      <div className="flex items-center justify-between border-b border-[#E7DFD3] pb-3 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormError(null);
+                            setRegStep("select");
+                          }}
+                          className="font-semibold text-[#5B1717]"
+                        >
+                          ← {dict.back}
+                        </button>
+                        <span className="font-medium text-[#1F1B18]/70">
+                          {formatDateLabel(selectedDate, lang)} •{" "}
+                          {selectedBatch?.displayTime}
+                        </span>
                       </div>
-                    )}
 
-                    {regType === "individual" ? (
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-semibold text-[#29231F] mb-1.5">
-                            {dict.fullName} <span className="text-[#A83224]">*</span>
-                          </label>
+                      {formError && (
+                        <div className="p-3 rounded-lg bg-[#A83224]/10 text-[#A83224] text-sm flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          <span>{formError}</span>
+                        </div>
+                      )}
+
+                      {regType === "individual" ? (
+                        <div className="space-y-3.5">
                           <input
                             type="text"
                             required
                             value={indName}
                             onChange={(e) => setIndName(e.target.value)}
                             placeholder={dict.fullNamePlaceholder}
-                            className="w-full rounded-lg border border-[#E9DDC9] bg-[#F8F3E9]/40 px-3.5 py-3 text-base focus:outline-none focus:border-[#5B1717] focus:ring-1 focus:ring-[#5B1717]"
+                            className="w-full rounded-xl border border-[#E7DFD3] bg-[#FAF7F2]/50 px-3.5 py-3 text-base focus:outline-none focus:border-[#5B1717]"
                           />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-semibold text-[#29231F] mb-1.5">
-                              {dict.phone}
-                            </label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <input
                               type="tel"
                               inputMode="numeric"
                               value={indPhone}
                               onChange={(e) => setIndPhone(e.target.value)}
-                              placeholder={dict.phonePlaceholder}
-                              className="w-full rounded-lg border border-[#E9DDC9] bg-[#F8F3E9]/40 px-3.5 py-3 text-base focus:outline-none focus:border-[#5B1717] focus:ring-1 focus:ring-[#5B1717]"
+                              placeholder={dict.phone}
+                              className="w-full rounded-xl border border-[#E7DFD3] bg-[#FAF7F2]/50 px-3.5 py-3 text-sm focus:outline-none focus:border-[#5B1717]"
                             />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-semibold text-[#29231F] mb-1.5">
-                              {dict.village}
-                            </label>
                             <input
                               type="text"
                               value={indVillage}
                               onChange={(e) => setIndVillage(e.target.value)}
-                              placeholder={dict.villagePlaceholder}
-                              className="w-full rounded-lg border border-[#E9DDC9] bg-[#F8F3E9]/40 px-3.5 py-3 text-base focus:outline-none focus:border-[#5B1717] focus:ring-1 focus:ring-[#5B1717]"
+                              placeholder={dict.village}
+                              className="w-full rounded-xl border border-[#E7DFD3] bg-[#FAF7F2]/50 px-3.5 py-3 text-sm focus:outline-none focus:border-[#5B1717]"
                             />
                           </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-6">
-                        <div className="p-4 rounded-lg bg-[#F8F3E9]/70 border border-[#E9DDC9] space-y-3.5">
-                          <h3 className="text-sm font-semibold text-[#5B1717]">
-                            {dict.leaderDetails}
-                          </h3>
-                          <div>
-                            <label className="block text-xs font-semibold text-[#29231F] mb-1">
-                              {dict.leaderName}{" "}
-                              <span className="text-[#A83224]">*</span>
-                            </label>
+                      ) : (
+                        <div className="space-y-5">
+                          <div className="p-4 rounded-xl bg-[#FAF7F2] border border-[#E7DFD3] space-y-3">
+                            <div className="text-xs font-semibold uppercase text-[#5B1717]">
+                              {dict.leaderDetails}
+                            </div>
                             <input
                               type="text"
                               required
                               value={leaderName}
                               onChange={(e) => setLeaderName(e.target.value)}
-                              placeholder={dict.fullNamePlaceholder}
-                              className="w-full rounded-lg border border-[#E9DDC9] bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#5B1717]"
+                              placeholder={`${dict.leaderName} *`}
+                              className="w-full rounded-lg border border-[#E7DFD3] bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#5B1717]"
                             />
-                          </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input
-                              type="tel"
-                              inputMode="numeric"
-                              value={leaderPhone}
-                              onChange={(e) => setLeaderPhone(e.target.value)}
-                              placeholder={dict.phone}
-                              className="w-full rounded-lg border border-[#E9DDC9] bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#5B1717]"
-                            />
-                            <input
-                              type="text"
-                              value={leaderVillage}
-                              onChange={(e) => setLeaderVillage(e.target.value)}
-                              placeholder={dict.village}
-                              className="w-full rounded-lg border border-[#E9DDC9] bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#5B1717]"
-                            />
-                          </div>
-                          <input
-                            type="text"
-                            value={groupName}
-                            onChange={(e) => setGroupName(e.target.value)}
-                            placeholder={dict.groupName}
-                            className="w-full rounded-lg border border-[#E9DDC9] bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#5B1717]"
-                          />
-                          <label className="flex items-center gap-2.5 pt-1 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={leaderAttending}
-                              onChange={(e) => setLeaderAttending(e.target.checked)}
-                              className="w-4 h-4 accent-[#5B1717]"
-                            />
-                            <span className="text-sm text-[#29231F]">
-                              {dict.leaderAttending}
-                            </span>
-                          </label>
-                        </div>
-
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-semibold text-[#29231F]">
-                              {dict.membersList}
-                            </h3>
-                            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#E9DDC9] text-[#29231F]">
-                              {dict.totalPeople}: {totalPeopleCount}
-                            </span>
-                          </div>
-
-                          {groupMembers.map((m, idx) => (
-                            <div
-                              key={m.id}
-                              className="p-3.5 rounded-lg bg-[#F8F3E9]/50 border border-[#E9DDC9] space-y-2.5"
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs font-semibold text-[#5B1717]">
-                                  #{idx + 1}
-                                </span>
-                                {(groupMembers.length > 1 || leaderAttending) && (
-                                  <button
-                                    type="button"
-                                    onClick={() => removeMemberRow(m.id)}
-                                    className="text-xs text-[#A83224] font-semibold flex items-center gap-1 hover:underline"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                    {dict.remove}
-                                  </button>
-                                )}
-                              </div>
+                            <div className="grid grid-cols-2 gap-2.5">
+                              <input
+                                type="tel"
+                                inputMode="numeric"
+                                value={leaderPhone}
+                                onChange={(e) => setLeaderPhone(e.target.value)}
+                                placeholder={dict.phone}
+                                className="w-full rounded-lg border border-[#E7DFD3] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#5B1717]"
+                              />
                               <input
                                 type="text"
-                                value={m.fullName}
-                                onChange={(e) =>
-                                  updateMemberRow(m.id, "fullName", e.target.value)
-                                }
-                                placeholder={`${dict.fullName} *`}
-                                className="w-full rounded-lg border border-[#E9DDC9] bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-[#5B1717]"
+                                value={leaderVillage}
+                                onChange={(e) => setLeaderVillage(e.target.value)}
+                                placeholder={dict.village}
+                                className="w-full rounded-lg border border-[#E7DFD3] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#5B1717]"
                               />
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                <input
-                                  type="tel"
-                                  inputMode="numeric"
-                                  value={m.phone}
-                                  onChange={(e) =>
-                                    updateMemberRow(m.id, "phone", e.target.value)
-                                  }
-                                  placeholder={dict.phone}
-                                  className="w-full rounded-lg border border-[#E9DDC9] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#5B1717]"
-                                />
+                            </div>
+                            <input
+                              type="text"
+                              value={groupName}
+                              onChange={(e) => setGroupName(e.target.value)}
+                              placeholder={dict.groupNamePlaceholder}
+                              className="w-full rounded-lg border border-[#E7DFD3] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#5B1717]"
+                            />
+                            <label className="flex items-center gap-2 text-sm cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={leaderAttending}
+                                onChange={(e) => setLeaderAttending(e.target.checked)}
+                                className="w-4 h-4 accent-[#5B1717]"
+                              />
+                              <span>{dict.leaderAttending}</span>
+                            </label>
+                          </div>
+
+                          <div className="space-y-2.5">
+                            <div className="flex items-center justify-between text-xs font-semibold">
+                              <span>{dict.membersList}</span>
+                              <span className="px-2.5 py-0.5 rounded-full bg-[#E7DFD3] tabular-nums">
+                                {dict.totalPeople}: {totalPeopleCount}
+                              </span>
+                            </div>
+
+                            {groupMembers.map((m, idx) => (
+                              <div
+                                key={m.id}
+                                className="p-3 rounded-xl bg-[#FAF7F2] border border-[#E7DFD3] space-y-2"
+                              >
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-[#5B1717]">
+                                    #{idx + 1}
+                                  </span>
+                                  {(groupMembers.length > 1 || leaderAttending) && (
+                                    <button
+                                      type="button"
+                                      onClick={() => removeMemberRow(m.id)}
+                                      className="text-[#A83224] font-semibold flex items-center gap-1"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                      {dict.remove}
+                                    </button>
+                                  )}
+                                </div>
                                 <input
                                   type="text"
-                                  value={m.village}
+                                  value={m.fullName}
                                   onChange={(e) =>
-                                    updateMemberRow(m.id, "village", e.target.value)
+                                    updateMemberRow(m.id, "fullName", e.target.value)
                                   }
-                                  placeholder={dict.village}
-                                  className="w-full rounded-lg border border-[#E9DDC9] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#5B1717]"
+                                  placeholder={dict.fullNamePlaceholder}
+                                  className="w-full rounded-lg border border-[#E7DFD3] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#5B1717]"
                                 />
+                                <div className="grid grid-cols-2 gap-2">
+                                  <input
+                                    type="tel"
+                                    inputMode="numeric"
+                                    value={m.phone}
+                                    onChange={(e) =>
+                                      updateMemberRow(m.id, "phone", e.target.value)
+                                    }
+                                    placeholder={dict.phone}
+                                    className="w-full rounded-lg border border-[#E7DFD3] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#5B1717]"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={m.village}
+                                    onChange={(e) =>
+                                      updateMemberRow(m.id, "village", e.target.value)
+                                    }
+                                    placeholder={dict.village}
+                                    className="w-full rounded-lg border border-[#E7DFD3] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#5B1717]"
+                                  />
+                                </div>
+                              </div>
+                            ))}
+
+                            <button
+                              type="button"
+                              onClick={addMemberRow}
+                              disabled={
+                                selectedBatch
+                                  ? totalGroupSlotsRequested >= selectedBatch.remaining
+                                  : false
+                              }
+                              className="w-full py-2.5 rounded-xl border border-dashed border-[#B58A45] text-[#5B1717] font-semibold text-sm flex items-center justify-center gap-1.5 disabled:opacity-40"
+                            >
+                              <Plus className="w-4 h-4" />
+                              {dict.addMember}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        className="w-full py-3.5 rounded-xl bg-[#5B1717] hover:bg-[#3E0F0F] text-[#FAF7F2] font-semibold text-base transition"
+                      >
+                        {dict.reviewSubmit}
+                      </button>
+                    </form>
+                  )}
+
+                  {regStep === "review" && selectedBatch && (
+                    <div className="space-y-5">
+                      <h3 className="font-editorial text-2xl text-[#1F1B18]">
+                        {dict.reviewTitle}
+                      </h3>
+                      <div className="rounded-xl bg-[#FAF7F2] border border-[#E7DFD3] p-4 space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-[#1F1B18]/65">{dict.dateLabel}</span>
+                          <span className="font-semibold">
+                            {formatDateLabel(selectedDate, lang)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#1F1B18]/65">{dict.batchLabel}</span>
+                          <span className="font-semibold">
+                            {selectedBatch.displayTime}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#1F1B18]/65">{dict.countLabel}</span>
+                          <span className="font-semibold tabular-nums">
+                            {totalPeopleCount}
+                          </span>
+                        </div>
+                      </div>
+
+                      <ul className="divide-y divide-[#E7DFD3] border border-[#E7DFD3] rounded-xl overflow-hidden text-sm">
+                        {regType === "individual" ? (
+                          <li className="px-4 py-2.5 font-medium">
+                            {indName}
+                            {indVillage ? ` • ${indVillage}` : ""}
+                          </li>
+                        ) : (
+                          <>
+                            {leaderAttending && (
+                              <li className="px-4 py-2.5 font-medium bg-[#FAF7F2]">
+                                {leaderName}
+                                {leaderVillage ? ` • ${leaderVillage}` : ""}
+                              </li>
+                            )}
+                            {groupMembers
+                              .filter((m) => m.fullName.trim().length > 0)
+                              .map((m) => (
+                                <li key={m.id} className="px-4 py-2.5">
+                                  {m.fullName}
+                                  {m.village ? ` • ${m.village}` : ""}
+                                </li>
+                              ))}
+                          </>
+                        )}
+                      </ul>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          disabled={submitting}
+                          onClick={() => setRegStep("details")}
+                          className="py-3 rounded-xl border border-[#E7DFD3] font-semibold text-sm"
+                        >
+                          {dict.back}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={submitting}
+                          onClick={handleSubmitRegistration}
+                          className="py-3 rounded-xl bg-[#4B6344] hover:bg-[#3a4d34] text-white font-semibold text-sm disabled:opacity-60"
+                        >
+                          {submitting ? dict.submitting : dict.submit}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {regStep === "confirmed" && confirmation && (
+                    <div className="space-y-5 text-center">
+                      <div className="rounded-xl overflow-hidden border border-[#B58A45]/60 bg-[#FAF7F2]">
+                        <div className="bg-[#5B1717] text-[#FAF7F2] px-5 py-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <CheckCircle2 className="w-5 h-5" />
+                            <h3 className="font-editorial text-2xl">
+                              {dict.confirmedTitle}
+                            </h3>
+                          </div>
+                        </div>
+
+                        <div className="p-5 space-y-4">
+                          <div>
+                            <div className="text-xs uppercase tracking-wider text-[#5B1717] font-semibold">
+                              {dict.regCode}
+                            </div>
+                            <div className="text-3xl font-mono font-bold tracking-widest text-[#1F1B18] mt-1">
+                              {confirmation.code}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2 text-xs bg-white p-3.5 rounded-lg border border-[#E7DFD3]">
+                            <div>
+                              <div className="text-[#1F1B18]/60">{dict.dateLabel}</div>
+                              <div className="font-semibold mt-0.5">
+                                {confirmation.annadanamDate}
                               </div>
                             </div>
-                          ))}
-
-                          <button
-                            type="button"
-                            onClick={addMemberRow}
-                            disabled={
-                              selectedBatch
-                                ? totalGroupSlotsRequested >= selectedBatch.remaining
-                                : false
-                            }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-[#B58A45] text-[#5B1717] font-semibold text-sm hover:bg-[#E9DDC9]/30 flex items-center justify-center gap-1.5 disabled:opacity-40"
-                          >
-                            <Plus className="w-4 h-4" />
-                            {dict.addMember.replace(/^\+\s*/, "")}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    <button
-                      type="submit"
-                      className="w-full py-3.5 rounded-lg bg-[#5B1717] hover:bg-[#3E0F0F] text-[#F8F3E9] font-semibold text-sm sm:text-base transition"
-                    >
-                      {dict.reviewSubmit}
-                    </button>
-                  </form>
-                )}
-
-                {/* STEP 3: REVIEW */}
-                {regStep === "review" && selectedBatch && (
-                  <div className="space-y-5">
-                    <h3 className="font-editorial text-2xl font-semibold text-[#29231F]">
-                      {dict.reviewTitle}
-                    </h3>
-                    <div className="rounded-lg bg-[#F8F3E9] border border-[#E9DDC9] p-4 space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-[#29231F]/70">{dict.dateLabel}</span>
-                        <span className="font-semibold">
-                          {formatDateLabel(selectedDate, lang)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[#29231F]/70">{dict.batchLabel}</span>
-                        <span className="font-semibold">
-                          {lang === "te" ? selectedBatch.nameTe : selectedBatch.name} (
-                          {selectedBatch.displayTime})
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[#29231F]/70">{dict.countLabel}</span>
-                        <span className="font-semibold">{totalPeopleCount}</span>
-                      </div>
-                    </div>
-
-                    <ul className="divide-y divide-[#E9DDC9] border border-[#E9DDC9] rounded-lg overflow-hidden text-sm">
-                      {regType === "individual" ? (
-                        <li className="px-4 py-2.5 font-medium">
-                          {indName}
-                          {indVillage ? ` • ${indVillage}` : ""}
-                        </li>
-                      ) : (
-                        <>
-                          {leaderAttending && (
-                            <li className="px-4 py-2.5 font-medium bg-[#F8F3E9]/60">
-                              {leaderName} (Leader)
-                              {leaderVillage ? ` • ${leaderVillage}` : ""}
-                            </li>
-                          )}
-                          {groupMembers
-                            .filter((m) => m.fullName.trim().length > 0)
-                            .map((m) => (
-                              <li key={m.id} className="px-4 py-2.5">
-                                {m.fullName}
-                                {m.village ? ` • ${m.village}` : ""}
-                              </li>
-                            ))}
-                        </>
-                      )}
-                    </ul>
-
-                    <div className="grid grid-cols-2 gap-3 pt-1">
-                      <button
-                        type="button"
-                        disabled={submitting}
-                        onClick={() => setRegStep("details")}
-                        className="py-3 rounded-lg border border-[#E9DDC9] font-semibold text-sm text-[#29231F] hover:bg-[#F8F3E9]"
-                      >
-                        {dict.back}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={submitting}
-                        onClick={handleSubmitRegistration}
-                        className="py-3 rounded-lg bg-[#52664B] hover:bg-[#3f5039] text-white font-semibold text-sm disabled:opacity-60"
-                      >
-                        {submitting ? dict.submitting : dict.submit}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* STEP 4: F. CONFIRMATION PASS */}
-                {regStep === "confirmed" && confirmation && (
-                  <div className="space-y-6 text-center">
-                    <div className="rounded-lg overflow-hidden border border-[#B58A45]/60 bg-[#F8F3E9]">
-                      <div className="bg-[#5B1717] text-[#F8F3E9] px-5 py-4">
-                        <p className="text-[11px] tracking-[0.2em] uppercase text-[#E9DDC9]">
-                          {dict.swamiSaranam}
-                        </p>
-                        <div className="flex items-center justify-center gap-2 mt-1">
-                          <CheckCircle2 className="w-5 h-5 text-[#E9DDC9]" />
-                          <h3 className="font-editorial text-2xl font-semibold">
-                            {dict.confirmedTitle}
-                          </h3>
-                        </div>
-                      </div>
-
-                      <div className="p-5 sm:p-6 space-y-5">
-                        <div>
-                          <div className="text-xs uppercase tracking-wider text-[#5B1717] font-semibold">
-                            {dict.regCode}
-                          </div>
-                          <div className="text-3xl font-mono font-bold tracking-widest text-[#29231F] mt-1">
-                            {confirmation.code}
-                          </div>
-                        </div>
-
-                        <div className="temple-rule text-xs text-[#B58A45]">◆</div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-left bg-white p-4 rounded-lg border border-[#E9DDC9]">
-                          <div>
-                            <div className="text-xs text-[#29231F]/60">
-                              {dict.dateLabel}
+                            <div>
+                              <div className="text-[#1F1B18]/60">{dict.batchLabel}</div>
+                              <div className="font-semibold mt-0.5">
+                                {data.batches.find(
+                                  (b) => b.batchId === confirmation.batchId
+                                )?.displayTime || confirmation.batchId}
+                              </div>
                             </div>
-                            <div className="font-semibold mt-0.5">
-                              {formatDateLabel(confirmation.annadanamDate, lang)}
+                            <div>
+                              <div className="text-[#1F1B18]/60">{dict.countLabel}</div>
+                              <div className="font-semibold mt-0.5 tabular-nums">
+                                {confirmation.memberCount}
+                              </div>
                             </div>
                           </div>
-                          <div>
-                            <div className="text-xs text-[#29231F]/60">
-                              {dict.batchLabel}
-                            </div>
-                            <div className="font-semibold mt-0.5">
-                              {data.batches.find(
-                                (b) => b.batchId === confirmation.batchId
-                              )?.displayTime || confirmation.batchId}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-xs text-[#29231F]/60">
-                              {dict.countLabel}
-                            </div>
-                            <div className="font-semibold mt-0.5">
-                              {confirmation.memberCount}
-                            </div>
-                          </div>
-                        </div>
 
-                        <div className="text-left">
-                          <div className="text-xs font-semibold uppercase tracking-wider text-[#29231F]/60 mb-2">
-                            {dict.membersList}
-                          </div>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap justify-center gap-1.5">
                             {confirmation.members.map((m, idx) => (
                               <span
                                 key={idx}
-                                className="px-3 py-1 rounded-md bg-white border border-[#E9DDC9] text-xs font-medium text-[#29231F]"
+                                className="px-3 py-1 rounded-md bg-white border border-[#E7DFD3] text-xs font-medium"
                               >
                                 {m.fullName}
                               </span>
                             ))}
                           </div>
+
+                          <p className="text-xs text-[#1F1B18]/65">
+                            {dict.confirmedSubtitle}
+                          </p>
                         </div>
-
-                        <p className="text-xs text-[#29231F]/70">
-                          {dict.confirmedSubtitle}
-                        </p>
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={resetRegistration}
+                        className="w-full py-3 rounded-xl bg-[#5B1717] text-[#FAF7F2] font-semibold text-sm"
+                      >
+                        {dict.newRegistration}
+                      </button>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={resetRegistration}
-                      className="w-full py-3 rounded-lg bg-[#5B1717] hover:bg-[#3E0F0F] text-[#F8F3E9] font-semibold text-sm"
-                    >
-                      {dict.newRegistration}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {mode === "full" && (
-              <p className="text-xs text-[#29231F]/65 text-center mt-5 leading-relaxed">
-                {dict.privacyNotice}
-              </p>
+                  )}
+                </div>
+              )
             )}
           </div>
         </section>
-
-        {/* G. TEMPLE INFORMATION & CONTACT */}
-        {mode === "full" && (
-          <section id="contact" className="py-14 sm:py-16 bg-[#E9DDC9]/35">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <p className="text-xs tracking-[0.18em] uppercase text-[#5B1717] font-semibold">
-                  {dict.contactEyebrow}
-                </p>
-                <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
-                  {dict.contactTitle}
-                </h2>
-              </div>
-
-              <div className="bg-[#F8F3E9] rounded-lg border border-[#E9DDC9] p-5 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#5B1717]">
-                  <Phone className="w-4 h-4" />
-                  {dict.contactOfficeLabel}
-                </div>
-                <p className="text-sm font-medium text-[#29231F]">
-                  {data?.temple.contactInfo || "Temple Annadanam Office"}
-                </p>
-                {data?.temple.allowVisitorCancel && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCancelStatus(null);
-                      setShowCancelModal(true);
-                    }}
-                    className="pt-1 text-xs font-semibold text-[#5B1717] underline underline-offset-4 hover:text-[#A83224]"
-                  >
-                    {dict.cancelCta}
-                  </button>
-                )}
-              </div>
-
-              <div className="bg-[#F8F3E9] rounded-lg border border-[#E9DDC9] p-5 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#5B1717]">
-                  <MapPin className="w-4 h-4" />
-                  {dict.contactHoursLabel}
-                </div>
-                <p className="text-sm font-medium text-[#29231F]">
-                  {dict.contactHoursValue}
-                </p>
-                <p className="text-xs text-[#29231F]/70">
-                  {dict.contactWindowLabel}: {dict.contactWindowValue}
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-        )}
       </main>
 
-      {/* H. FOOTER */}
-      <footer className="bg-[#29231F] text-[#E9DDC9] border-t border-[#B58A45]/40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div className="space-y-1">
-            <p className="text-xs tracking-[0.2em] uppercase text-[#B58A45] font-semibold">
-              {dict.swamiSaranam}
-            </p>
-            <p className="font-editorial text-xl text-[#F8F3E9]">
-              {data
-                ? lang === "te"
-                  ? data.temple.nameTe
-                  : data.temple.name
-                : dict.annadanamTitle}
-            </p>
-            <p className="text-xs text-[#E9DDC9]/70">
-              {data?.temple.contactInfo}
-            </p>
+      {/* Clean Single-Row Footer */}
+      <footer className="border-t border-[#E7DFD3] bg-white/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#1F1B18]/70">
+          <div className="font-medium">
+            {dict.swamiSaranam} • {data?.temple.contactInfo}
           </div>
-
-          <div className="flex flex-wrap items-center gap-5 text-xs">
-            <button
-              type="button"
-              onClick={() => toggleLang(lang === "te" ? "en" : "te")}
-              className="text-[#E9DDC9] hover:text-white underline underline-offset-4"
-            >
-              {lang === "te" ? "Switch to English" : "తెలుగులో చూడండి"}
-            </button>
+          <div className="flex items-center gap-5">
+            {data?.temple.allowVisitorCancel && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCancelStatus(null);
+                  setShowCancelModal(true);
+                }}
+                className="text-[#5B1717] font-semibold hover:underline"
+              >
+                {dict.cancelCta}
+              </button>
+            )}
             <Link
               href="/admin/login"
-              className="inline-flex items-center gap-1.5 text-[#E9DDC9]/80 hover:text-white"
+              className="inline-flex items-center gap-1 hover:text-[#5B1717]"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-[#B58A45]" />
+              <ShieldCheck className="w-3.5 h-3.5" />
               {dict.organizerLogin}
             </Link>
           </div>
@@ -1441,27 +1200,23 @@ export default function PublicRegistrationApp({
 
       {/* Self-Cancel Modal */}
       {showCancelModal && (
-        <div className="fixed inset-0 bg-[#29231F]/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#F8F3E9] rounded-xl max-w-md w-full p-6 space-y-4 border border-[#E9DDC9] shadow-xl">
+        <div className="fixed inset-0 bg-[#1F1B18]/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-[#FAF7F2] rounded-xl max-w-sm w-full p-5 space-y-4 border border-[#E7DFD3] shadow-xl">
             <div className="flex items-center justify-between">
-              <h3 className="font-editorial text-xl font-bold text-[#29231F]">
+              <h3 className="font-editorial text-xl text-[#1F1B18]">
                 {dict.cancelTitle}
               </h3>
-              <button
-                type="button"
-                onClick={() => setShowCancelModal(false)}
-                className="text-[#29231F]/50 hover:text-[#29231F]"
-              >
-                <XCircle className="w-5 h-5" />
+              <button type="button" onClick={() => setShowCancelModal(false)}>
+                <XCircle className="w-5 h-5 text-[#1F1B18]/50" />
               </button>
             </div>
-            <p className="text-xs text-[#29231F]/75">{dict.cancelSubtitle}</p>
+            <p className="text-xs text-[#1F1B18]/70">{dict.cancelSubtitle}</p>
 
             {cancelStatus && (
               <div
-                className={`p-3 rounded-lg text-sm border ${
+                className={`p-3 rounded-lg text-xs border ${
                   cancelStatus.type === "success"
-                    ? "bg-[#52664B]/10 text-[#52664B] border-[#52664B]/30"
+                    ? "bg-[#4B6344]/10 text-[#4B6344] border-[#4B6344]/30"
                     : "bg-[#A83224]/10 text-[#A83224] border-[#A83224]/30"
                 }`}
               >
@@ -1476,12 +1231,12 @@ export default function PublicRegistrationApp({
                 value={cancelCode}
                 onChange={(e) => setCancelCode(e.target.value.toUpperCase())}
                 placeholder={dict.enterCode}
-                className="w-full rounded-lg border border-[#E9DDC9] bg-white px-3.5 py-3 text-base font-mono uppercase focus:outline-none focus:border-[#5B1717]"
+                className="w-full rounded-lg border border-[#E7DFD3] bg-white px-3.5 py-2.5 text-sm font-mono uppercase focus:outline-none focus:border-[#5B1717]"
               />
               <button
                 type="submit"
                 disabled={cancelling}
-                className="w-full py-3 rounded-lg bg-[#A83224] hover:bg-[#8a281c] text-white font-semibold text-sm disabled:opacity-60"
+                className="w-full py-2.5 rounded-lg bg-[#A83224] text-white font-semibold text-sm disabled:opacity-60"
               >
                 {cancelling ? "..." : dict.cancelButton}
               </button>

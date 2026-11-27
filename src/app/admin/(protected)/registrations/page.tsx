@@ -201,12 +201,9 @@ export default function AdminRegistrationsPage() {
     <div className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
+          <h1 className="font-editorial text-2xl sm:text-3xl text-[#1F1B18]">
             {at.registrations.title}
           </h1>
-          <p className="text-sm text-[#29231F]/70">
-            {at.registrations.subtitle}
-          </p>
         </div>
         <button
           type="button"
