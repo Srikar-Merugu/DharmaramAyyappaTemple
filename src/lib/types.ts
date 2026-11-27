@@ -17,6 +17,7 @@ export interface SeasonSettings {
   contactInfo: string;
   allowVisitorCancel: boolean;
   allowWalkinOverCapacity: boolean;
+  adminPin?: string;
   updatedAt: Date;
 }
 

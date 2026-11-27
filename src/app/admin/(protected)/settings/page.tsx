@@ -17,6 +17,7 @@ interface SettingsState {
   contactInfo: string;
   allowVisitorCancel: boolean;
   allowWalkinOverCapacity: boolean;
+  adminPin?: string;
 }
 
 interface BatchState {
@@ -216,6 +217,24 @@ export default function AdminSettingsPage() {
                   setSettings({ ...settings, contactInfo: e.target.value })
                 }
                 className="w-full rounded-lg border border-[#E9DDC9] px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#29231F]/70 mb-1">
+                Organizer Login PIN (4 digits)
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={settings.adminPin || "1081"}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    adminPin: e.target.value.replace(/\D/g, ""),
+                  })
+                }
+                className="w-full rounded-lg border border-[#E9DDC9] px-3 py-2 text-sm font-mono font-bold"
               />
             </div>
           </div>

@@ -60,6 +60,7 @@ async function runSeed(db: Db): Promise<void> {
       contactInfo: "+91 98765 43210 • Temple Annadanam Office",
       allowVisitorCancel: true,
       allowWalkinOverCapacity: true,
+      adminPin: process.env.DEFAULT_ADMIN_PIN || "1081",
       updatedAt: new Date(),
     });
   }

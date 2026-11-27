@@ -56,6 +56,7 @@ const updateSettingsSchema = z.object({
     contactInfo: z.string().trim().max(200),
     allowVisitorCancel: z.boolean(),
     allowWalkinOverCapacity: z.boolean(),
+    adminPin: z.string().trim().regex(/^\d{4,6}$/).optional(),
   }),
   batches: z.array(
     z.object({

@@ -7,35 +7,86 @@ import {
   signSessionToken,
   verifyPassword,
 } from "@/lib/auth";
-import type { AdminUser } from "@/lib/types";
+import { checkRateLimit } from "@/lib/rate-limit";
+import type { AdminUser, SeasonSettings } from "@/lib/types";
 
-const loginSchema = z.object({
+const pinLoginSchema = z.object({
+  pin: z.string().trim().regex(/^\d{4,6}$/, "Enter 4-digit PIN"),
+});
+
+const passwordLoginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const parsed = loginSchema.safeParse(body);
-    if (!parsed.success) {
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+    if (!checkRateLimit(`login:${ip}`, 15, 60_000)) {
       return NextResponse.json(
-        { error: "Valid email and password are required." },
-        { status: 400 }
+        { error: "Too many login attempts. Please wait 1 minute." },
+        { status: 429 }
       );
     }
 
+    const body = await req.json();
     const db = await getDb();
     await ensureSeeded(db);
 
-    const email = parsed.data.email.toLowerCase().trim();
-    const admin = await db
-      .collection<AdminUser>("admin_users")
-      .findOne({ email, active: true });
+    let admin: AdminUser | null = null;
 
-    if (!admin || !admin._id || !verifyPassword(parsed.data.password, admin.passwordHash)) {
+    if (typeof body?.pin === "string") {
+      const parsed = pinLoginSchema.safeParse(body);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: "Please enter a valid 4-digit PIN." },
+          { status: 400 }
+        );
+      }
+
+      const settings = await db
+        .collection<SeasonSettings>("season_settings")
+        .findOne({ _id: "default" });
+      const expectedPin =
+        settings?.adminPin || process.env.DEFAULT_ADMIN_PIN || "1081";
+
+      if (parsed.data.pin !== expectedPin) {
+        return NextResponse.json(
+          { error: "Wrong PIN. Please try again. / తప్పు పిన్." },
+          { status: 401 }
+        );
+      }
+
+      admin = await db
+        .collection<AdminUser>("admin_users")
+        .findOne({ active: true });
+    } else {
+      const parsed = passwordLoginSchema.safeParse(body);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: "Valid email and password are required." },
+          { status: 400 }
+        );
+      }
+
+      const email = parsed.data.email.toLowerCase().trim();
+      const found = await db
+        .collection<AdminUser>("admin_users")
+        .findOne({ email, active: true });
+
+      if (!found || !verifyPassword(parsed.data.password, found.passwordHash)) {
+        return NextResponse.json(
+          { error: "Invalid email or password." },
+          { status: 401 }
+        );
+      }
+      admin = found;
+    }
+
+    if (!admin || !admin._id) {
       return NextResponse.json(
-        { error: "Invalid email or password." },
+        { error: "Organizer account not found." },
         { status: 401 }
       );
     }
@@ -59,7 +110,7 @@ export async function POST(req: NextRequest) {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 12,
+      maxAge: 60 * 60 * 24, // 24 hours so organizer stays signed in all day
     });
 
     return res;
