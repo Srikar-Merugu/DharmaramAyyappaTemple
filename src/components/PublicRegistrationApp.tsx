@@ -748,23 +748,26 @@ export default function PublicRegistrationApp({
         )}
 
         {/* E. MOBILE-FIRST REGISTRATION SECTION */}
-        <section id="register" className="py-14 sm:py-20 border-b border-[#E9DDC9]">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6">
-            <div className="text-center space-y-2 mb-8">
-              <p className="text-xs tracking-[0.18em] uppercase text-[#5B1717] font-semibold">
-                {dict.swamiSaranam}
-              </p>
-              <h2 className="font-editorial text-3xl sm:text-4xl font-semibold text-[#29231F]">
+        <section
+          id="register"
+          className={
+            mode === "register"
+              ? "py-6 sm:py-10"
+              : "py-14 sm:py-20 border-b border-[#E9DDC9]"
+          }
+        >
+          <div className="max-w-2xl mx-auto px-4 sm:px-6">
+            <div className="text-center space-y-1 mb-6">
+              <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#29231F]">
                 {dict.annadanamTitle}
               </h2>
-              <p className="text-sm text-[#29231F]/75">{dict.subtitle}</p>
             </div>
 
             {data && (
-              <div className="bg-white rounded-xl border border-[#E9DDC9] p-5 sm:p-8 shadow-sm">
+              <div className="bg-white rounded-xl border border-[#E9DDC9] p-4 sm:p-7 shadow-sm">
                 {/* STEP 1: TYPE, DATE, BATCH */}
                 {regStep === "select" && (
-                  <div className="space-y-7">
+                  <div className="space-y-6">
                     {formError && (
                       <div className="p-3.5 rounded-lg bg-[#A83224]/10 border border-[#A83224]/30 text-[#A83224] text-sm flex items-start gap-2">
                         <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -774,75 +777,59 @@ export default function PublicRegistrationApp({
 
                     {/* Registration Type */}
                     <div>
-                      <h3 className="text-sm font-semibold text-[#29231F] mb-3">
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-[#29231F]/70 mb-2.5">
                         1. {dict.chooseType}
                       </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-3">
                         <button
                           type="button"
                           onClick={() => setRegType("individual")}
-                          className={`p-4 rounded-lg border text-left transition flex items-center gap-3.5 ${
+                          className={`p-3.5 rounded-xl border-2 text-left transition-all flex items-center justify-between gap-2 active:scale-[0.98] ${
                             regType === "individual"
-                              ? "border-[#5B1717] bg-[#5B1717]/5 ring-1 ring-[#5B1717]"
-                              : "border-[#E9DDC9] hover:border-[#B58A45]"
+                              ? "border-[#5B1717] bg-[#5B1717] text-[#F8F3E9] shadow-sm"
+                              : "border-[#E9DDC9] bg-[#F8F3E9]/50 text-[#29231F] hover:border-[#B58A45]"
                           }`}
                         >
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                              regType === "individual"
-                                ? "bg-[#5B1717] text-[#F8F3E9]"
-                                : "bg-[#E9DDC9]/60 text-[#29231F]"
-                            }`}
-                          >
-                            <User className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <div className="font-semibold text-sm text-[#29231F]">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <User className="w-5 h-5 shrink-0" />
+                            <span className="font-semibold text-sm sm:text-base truncate">
                               {dict.individualTitle}
-                            </div>
-                            <div className="text-xs text-[#29231F]/70">
-                              {dict.individualDesc}
-                            </div>
+                            </span>
                           </div>
+                          {regType === "individual" && (
+                            <CheckCircle2 className="w-5 h-5 shrink-0 text-[#F8F3E9]" />
+                          )}
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setRegType("group")}
-                          className={`p-4 rounded-lg border text-left transition flex items-center gap-3.5 ${
+                          className={`p-3.5 rounded-xl border-2 text-left transition-all flex items-center justify-between gap-2 active:scale-[0.98] ${
                             regType === "group"
-                              ? "border-[#5B1717] bg-[#5B1717]/5 ring-1 ring-[#5B1717]"
-                              : "border-[#E9DDC9] hover:border-[#B58A45]"
+                              ? "border-[#5B1717] bg-[#5B1717] text-[#F8F3E9] shadow-sm"
+                              : "border-[#E9DDC9] bg-[#F8F3E9]/50 text-[#29231F] hover:border-[#B58A45]"
                           }`}
                         >
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                              regType === "group"
-                                ? "bg-[#5B1717] text-[#F8F3E9]"
-                                : "bg-[#E9DDC9]/60 text-[#29231F]"
-                            }`}
-                          >
-                            <Users className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <div className="font-semibold text-sm text-[#29231F]">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <Users className="w-5 h-5 shrink-0" />
+                            <span className="font-semibold text-sm sm:text-base truncate">
                               {dict.groupTitle}
-                            </div>
-                            <div className="text-xs text-[#29231F]/70">
-                              {dict.groupDesc}
-                            </div>
+                            </span>
                           </div>
+                          {regType === "group" && (
+                            <CheckCircle2 className="w-5 h-5 shrink-0 text-[#F8F3E9]" />
+                          )}
                         </button>
                       </div>
                     </div>
 
                     {/* Date Picker */}
                     <div>
-                      <h3 className="text-sm font-semibold text-[#29231F] mb-3 flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-[#5B1717]" />
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-[#29231F]/70 mb-2.5 flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-[#5B1717]" />
                         2. {dict.selectDate}
                       </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         {data.dates.map((d, idx) => {
                           const isSelected = selectedDate === d.date;
                           const dayTag =
@@ -861,24 +848,33 @@ export default function PublicRegistrationApp({
                                 setSelectedBatchId("");
                                 setFormError(null);
                               }}
-                              className={`p-3.5 rounded-lg border text-left transition ${
+                              className={`p-3.5 rounded-xl border-2 text-left transition-all flex items-center justify-between gap-2 active:scale-[0.98] ${
                                 !d.available
                                   ? "bg-[#E9DDC9]/30 border-[#E9DDC9] text-[#29231F]/40 cursor-not-allowed"
                                   : isSelected
-                                  ? "border-[#5B1717] bg-[#5B1717]/5 ring-1 ring-[#5B1717]"
-                                  : "border-[#E9DDC9] hover:border-[#B58A45]"
+                                  ? "border-[#5B1717] bg-[#5B1717] text-[#F8F3E9] shadow-sm"
+                                  : "border-[#E9DDC9] bg-[#F8F3E9]/50 text-[#29231F] hover:border-[#B58A45]"
                               }`}
                             >
-                              <div className="text-[11px] font-semibold uppercase tracking-wider text-[#5B1717]">
-                                {dayTag}
-                              </div>
-                              <div className="text-sm font-semibold mt-0.5">
-                                {formatDateLabel(d.date, lang)}
-                              </div>
-                              {!d.available && d.reason && (
-                                <div className="text-[11px] text-[#A83224] mt-1">
-                                  {dict.reasons[d.reason]}
+                              <div>
+                                <div
+                                  className={`text-[11px] font-semibold uppercase tracking-wider ${
+                                    isSelected ? "text-[#E9DDC9]" : "text-[#5B1717]"
+                                  }`}
+                                >
+                                  {dayTag}
                                 </div>
+                                <div className="text-sm font-semibold mt-0.5">
+                                  {formatDateLabel(d.date, lang)}
+                                </div>
+                                {!d.available && d.reason && (
+                                  <div className="text-[11px] text-[#A83224] mt-0.5">
+                                    {dict.reasons[d.reason]}
+                                  </div>
+                                )}
+                              </div>
+                              {isSelected && d.available && (
+                                <CheckCircle2 className="w-5 h-5 shrink-0 text-[#F8F3E9]" />
                               )}
                             </button>
                           );
@@ -888,11 +884,11 @@ export default function PublicRegistrationApp({
 
                     {/* Batch Selector */}
                     <div>
-                      <h3 className="text-sm font-semibold text-[#29231F] mb-3 flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-[#5B1717]" />
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-[#29231F]/70 mb-2.5 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-[#5B1717]" />
                         3. {dict.selectBatch}
                       </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         {batchesForSelectedDate.map((b) => {
                           const isSelected = selectedBatchId === b.batchId;
                           const dateAvail = data.dates.find(
@@ -908,31 +904,44 @@ export default function PublicRegistrationApp({
                                 setSelectedBatchId(b.batchId);
                                 setFormError(null);
                               }}
-                              className={`p-4 rounded-lg border text-left transition ${
+                              className={`p-3.5 rounded-xl border-2 text-left transition-all active:scale-[0.98] ${
                                 disabled
                                   ? "bg-[#E9DDC9]/30 border-[#E9DDC9] text-[#29231F]/40 cursor-not-allowed"
                                   : isSelected
-                                  ? "border-[#5B1717] bg-[#5B1717]/5 ring-1 ring-[#5B1717]"
-                                  : "border-[#E9DDC9] hover:border-[#B58A45]"
+                                  ? "border-[#5B1717] bg-[#5B1717] text-[#F8F3E9] shadow-sm"
+                                  : "border-[#E9DDC9] bg-[#F8F3E9]/50 text-[#29231F] hover:border-[#B58A45]"
                               }`}
                             >
                               <div className="flex items-center justify-between gap-2">
-                                <span className="text-xs font-semibold text-[#5B1717]">
-                                  {lang === "te" ? b.nameTe : b.name}
-                                </span>
                                 <span
-                                  className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                                    b.isFull
-                                      ? "bg-[#A83224]/15 text-[#A83224]"
-                                      : "bg-[#52664B]/15 text-[#52664B]"
+                                  className={`text-xs font-semibold ${
+                                    isSelected ? "text-[#E9DDC9]" : "text-[#5B1717]"
                                   }`}
                                 >
-                                  {b.isFull ? dict.full : `${b.remaining} ${dict.seatsLeft}`}
+                                  {lang === "te" ? b.nameTe : b.name}
                                 </span>
+                                {isSelected ? (
+                                  <CheckCircle2 className="w-4 h-4 text-[#F8F3E9]" />
+                                ) : (
+                                  <span
+                                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                                      b.isFull
+                                        ? "bg-[#A83224]/15 text-[#A83224]"
+                                        : "bg-[#52664B]/15 text-[#52664B]"
+                                    }`}
+                                  >
+                                    {b.isFull ? dict.full : `${b.remaining} ${dict.seatsLeft}`}
+                                  </span>
+                                )}
                               </div>
-                              <div className="font-editorial text-2xl font-bold text-[#29231F] mt-1">
+                              <div className="font-editorial text-2xl font-bold mt-1">
                                 {b.displayTime}
                               </div>
+                              {isSelected && (
+                                <div className="text-[11px] text-[#E9DDC9] mt-0.5">
+                                  {b.remaining} {dict.seatsLeft}
+                                </div>
+                              )}
                             </button>
                           );
                         })}
@@ -942,7 +951,7 @@ export default function PublicRegistrationApp({
                     <button
                       type="button"
                       onClick={handleContinueToDetails}
-                      className="w-full py-3.5 rounded-lg bg-[#5B1717] hover:bg-[#3E0F0F] text-[#F8F3E9] font-semibold text-sm sm:text-base transition flex items-center justify-center gap-2"
+                      className="w-full py-3.5 rounded-xl bg-[#5B1717] hover:bg-[#3E0F0F] text-[#F8F3E9] font-semibold text-base transition flex items-center justify-center gap-2 active:scale-[0.99]"
                     >
                       {dict.registerCta}
                       <ChevronRight className="w-4 h-4" />
@@ -1330,14 +1339,17 @@ export default function PublicRegistrationApp({
               </div>
             )}
 
-            <p className="text-xs text-[#29231F]/65 text-center mt-5 leading-relaxed">
-              {dict.privacyNotice}
-            </p>
+            {mode === "full" && (
+              <p className="text-xs text-[#29231F]/65 text-center mt-5 leading-relaxed">
+                {dict.privacyNotice}
+              </p>
+            )}
           </div>
         </section>
 
         {/* G. TEMPLE INFORMATION & CONTACT */}
-        <section id="contact" className="py-14 sm:py-16 bg-[#E9DDC9]/35">
+        {mode === "full" && (
+          <section id="contact" className="py-14 sm:py-16 bg-[#E9DDC9]/35">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
@@ -1386,6 +1398,7 @@ export default function PublicRegistrationApp({
             </div>
           </div>
         </section>
+        )}
       </main>
 
       {/* H. FOOTER */}

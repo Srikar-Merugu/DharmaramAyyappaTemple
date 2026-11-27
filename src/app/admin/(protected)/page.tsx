@@ -16,6 +16,11 @@ import {
 interface OverviewData {
   date: string;
   today: string;
+  upcomingCounts?: Array<{
+    date: string;
+    label: string;
+    expectedCount: number;
+  }>;
   settings: {
     name: string;
     registrationEnabled: boolean;
@@ -116,6 +121,41 @@ export default function AdminOverviewPage() {
 
       {data && (
         <>
+          {data.upcomingCounts && (
+            <div className="flex flex-wrap items-center gap-2">
+              {data.upcomingCounts.map((u) => {
+                const active = u.date === date;
+                return (
+                  <button
+                    key={u.date}
+                    type="button"
+                    onClick={() => handleDateChange(u.date)}
+                    className={`px-3.5 py-2 rounded-lg text-xs font-semibold border transition flex items-center gap-2 ${
+                      active
+                        ? "bg-[#5B1717] text-[#F8F3E9] border-[#5B1717]"
+                        : "bg-white text-[#29231F] border-[#E9DDC9] hover:border-[#B58A45]"
+                    }`}
+                  >
+                    <span>
+                      {u.label} ({u.date.slice(5)})
+                    </span>
+                    <span
+                      className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold ${
+                        active
+                          ? "bg-[#F8F3E9] text-[#5B1717]"
+                          : u.expectedCount > 0
+                          ? "bg-[#52664B]/15 text-[#52664B]"
+                          : "bg-[#E9DDC9]/60 text-[#29231F]/60"
+                      }`}
+                    >
+                      {u.expectedCount}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white rounded-xl p-4 border border-[#E9DDC9]">
               <div className="flex items-center justify-between text-xs font-semibold text-[#29231F]/65 uppercase tracking-wider">

@@ -3,7 +3,7 @@ import { getDb } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { ensureSeeded } from "@/lib/seed";
 import { getBatchAvailability, getSettingsAndBatches } from "@/lib/booking-engine";
-import { getNowInTimezone } from "@/lib/timezone";
+import { addDaysToDateStr, getNowInTimezone } from "@/lib/timezone";
 import type {
   AttendanceRecord,
   Registration,
@@ -20,21 +20,42 @@ export async function GET(req: NextRequest) {
     const { dateStr: today } = getNowInTimezone(settings.timezone || "Asia/Kolkata");
     const date = req.nextUrl.searchParams.get("date") || today;
 
-    const [batchAvailability, regs, members, walkins] = await Promise.all([
-      getBatchAvailability(db, date, batches),
-      db
-        .collection<Registration>("registrations")
-        .find({ annadanamDate: date })
-        .toArray(),
-      db
-        .collection<RegistrationMember>("registration_members")
-        .find({ annadanamDate: date, registrationStatus: "active" })
-        .toArray(),
-      db
-        .collection<AttendanceRecord>("attendance_records")
-        .find({ annadanamDate: date, source: "walk-in" })
-        .toArray(),
-    ]);
+    const next3Dates = [
+      today,
+      addDaysToDateStr(today, 1),
+      addDaysToDateStr(today, 2),
+    ];
+
+    const [batchAvailability, regs, members, walkins, upcomingMembers] =
+      await Promise.all([
+        getBatchAvailability(db, date, batches),
+        db
+          .collection<Registration>("registrations")
+          .find({ annadanamDate: date })
+          .toArray(),
+        db
+          .collection<RegistrationMember>("registration_members")
+          .find({ annadanamDate: date, registrationStatus: "active" })
+          .toArray(),
+        db
+          .collection<AttendanceRecord>("attendance_records")
+          .find({ annadanamDate: date, source: "walk-in" })
+          .toArray(),
+        db
+          .collection<RegistrationMember>("registration_members")
+          .find({
+            annadanamDate: { $in: next3Dates },
+            registrationStatus: "active",
+          })
+          .project({ annadanamDate: 1 })
+          .toArray(),
+      ]);
+
+    const upcomingCounts = next3Dates.map((d, idx) => ({
+      date: d,
+      label: idx === 0 ? "Today" : idx === 1 ? "Tomorrow" : "Day After",
+      expectedCount: upcomingMembers.filter((m) => m.annadanamDate === d).length,
+    }));
 
     const activeRegs = regs.filter((r) => r.status === "active");
     const cancelledRegs = regs.filter((r) => r.status === "cancelled");
@@ -52,6 +73,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       date,
       today,
+      upcomingCounts,
       settings: {
         name: settings.name,
         registrationEnabled: settings.registrationEnabled,
